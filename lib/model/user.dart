@@ -1,13 +1,13 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-class EmailUserModel {
+class UserModel {
   final String email;
   final String displayName;
   final String phoneNumber;
   final String photoUrl;
   final String uid;
-  EmailUserModel({
+  UserModel({
     required this.email,
     required this.displayName,
     required this.phoneNumber,
@@ -15,14 +15,14 @@ class EmailUserModel {
     required this.uid,
   });
 
-  EmailUserModel copyWith({
+  UserModel copyWith({
     String? email,
     String? displayName,
     String? phoneNumber,
     String? photoUrl,
     String? uid,
   }) {
-    return EmailUserModel(
+    return UserModel(
       email: email ?? this.email,
       displayName: displayName ?? this.displayName,
       phoneNumber: phoneNumber ?? this.phoneNumber,
@@ -41,8 +41,8 @@ class EmailUserModel {
     };
   }
 
-  factory EmailUserModel.fromMap(Map<String, dynamic> map) {
-    return EmailUserModel(
+  factory UserModel.fromMap(Map<String, dynamic> map) {
+    return UserModel(
       email: map['email'] ?? '',
       displayName: map['displayName'] ?? '',
       phoneNumber: map['phoneNumber'] ?? '',
@@ -51,18 +51,13 @@ class EmailUserModel {
     );
   }
 
-  String toJson() => json.encode(toMap());
-
-  factory EmailUserModel.fromJson(String source) =>
-      EmailUserModel.fromMap(json.decode(source) as Map<String, dynamic>);
-
   @override
   String toString() {
     return 'emailUser(email: $email, displayName: $displayName, phoneNumber: $phoneNumber, photoUrl: $photoUrl, uid: $uid)';
   }
 
   @override
-  bool operator ==(covariant EmailUserModel other) {
+  bool operator ==(covariant UserModel other) {
     if (identical(this, other)) return true;
 
     return other.email == email &&
