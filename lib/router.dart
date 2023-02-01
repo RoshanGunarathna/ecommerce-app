@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'core/common/widgets/error.dart';
+import 'core/common/widgets/error_text.dart';
 import 'features/home/screens/home_screen.dart';
 
 Route<dynamic> generateRoute(RouteSettings routeSettings) {
@@ -13,7 +13,7 @@ Route<dynamic> generateRoute(RouteSettings routeSettings) {
     default:
       return MaterialPageRoute(
         builder: (context) => const Scaffold(
-          body: ErrorScreen(
+          body: ErrorText(
             error: 'This page doesn\'t exit',
           ),
         ),
