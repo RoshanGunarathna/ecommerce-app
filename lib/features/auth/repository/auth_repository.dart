@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_app/core/failure.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -17,6 +18,7 @@ final authRepositoryProvider = Provider(
     firestore: ref.read(firestoreProvider),
     auth: ref.read(authProvider),
     googleSignIn: ref.read(googleSigninProvider),
+    facebookAuth: ref.read(facebookSigninProvider),
   ),
 );
 
@@ -24,20 +26,24 @@ class AuthRepository {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
+  final FacebookAuth _facebookAuth;
 
   AuthRepository({
     required FirebaseFirestore firestore,
     required FirebaseAuth auth,
     required GoogleSignIn googleSignIn,
+    required FacebookAuth facebookAuth,
   })  : _auth = auth,
         _firestore = firestore,
-        _googleSignIn = googleSignIn;
+        _googleSignIn = googleSignIn,
+        _facebookAuth = facebookAuth;
 
   CollectionReference get _users =>
       _firestore.collection(FirebaseConstants.userCollection);
 
   Stream<User?> get authStateChange => _auth.authStateChanges();
 
+//Google sign-in
   FutureEither<UserModel> signinWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -48,6 +54,43 @@ class AuthRepository {
         accessToken: googleAuth?.accessToken,
         idToken: googleAuth?.idToken,
       );
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+
+      UserModel userModel;
+
+      if (userCredential.additionalUserInfo!.isNewUser) {
+        userModel = UserModel(
+            email: userCredential.user!.email ?? '',
+            displayName: userCredential.user!.displayName ?? '',
+            phoneNumber: userCredential.user!.phoneNumber ?? '',
+            photoUrl: userCredential.user!.photoURL ?? Constants.avatarDefault,
+            uid: userCredential.user!.uid);
+        await _users.doc(userCredential.user!.uid).set(
+              userModel.toMap(),
+            );
+      } else {
+        userModel = await getUserData(userCredential.user!.uid).first;
+      }
+      return right(userModel);
+    } on FirebaseException catch (e) {
+      throw e.message!;
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  //Facebook sign-in
+  FutureEither<UserModel> signinWithFacebook() async {
+    try {
+      final LoginResult loginResult = await _facebookAuth.login();
+
+      // final googleAuth = await googleUser?.authentication;
+      print(loginResult.status);
+
+      final OAuthCredential credential =
+          FacebookAuthProvider.credential(loginResult.accessToken!.token);
+
       UserCredential userCredential =
           await _auth.signInWithCredential(credential);
 

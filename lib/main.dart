@@ -47,6 +47,7 @@ class _MyAppState extends ConsumerState<MyApp> {
     if (data != null) {
       getData(ref, data);
       if (userModel != null) {
+        print(userModel!.email);
         return const HomeScreen();
       }
     }
