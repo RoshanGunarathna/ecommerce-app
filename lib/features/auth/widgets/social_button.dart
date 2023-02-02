@@ -23,8 +23,14 @@ class SocialButton extends ConsumerWidget {
       this.verticalPadding = 10})
       : super(key: key);
 
+//Google sign-in
   void signInWithGoogle(WidgetRef ref, BuildContext context) {
     ref.read(authControllerProvider.notifier).signInWithGoogle(context);
+  }
+
+//facebook sign-in
+  void signInWithFacebook(WidgetRef ref, BuildContext context) {
+    ref.read(authControllerProvider.notifier).signInWithFacebook(context);
   }
 
   @override
@@ -32,7 +38,7 @@ class SocialButton extends ConsumerWidget {
     return TextButton.icon(
       onPressed: () {
         socialButtonType == SocialButtonType.facebook
-            ? () {}
+            ? signInWithFacebook(ref, context)
             : signInWithGoogle(ref, context);
       },
       icon: SvgPicture.asset(

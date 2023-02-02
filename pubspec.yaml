@@ -46,6 +46,8 @@ dependencies:
   google_sign_in: ^5.4.3
   pinput: ^2.2.21
   fpdart: ^0.4.0
+  flutter_facebook_auth: ^5.0.7
+  flutter_facebook_sdk: ^1.0.0
 
 
 
