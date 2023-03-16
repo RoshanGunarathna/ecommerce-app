@@ -2,79 +2,89 @@
 import 'dart:convert';
 
 class UserModel {
+  final String id;
+  final String name;
+
+  final String address;
   final String email;
-  final String displayName;
-  final String phoneNumber;
   final String photoUrl;
-  final String uid;
+  final List<dynamic> cart;
   UserModel({
+    required this.id,
+    required this.name,
+    required this.address,
     required this.email,
-    required this.displayName,
-    required this.phoneNumber,
     required this.photoUrl,
-    required this.uid,
+    required this.cart,
   });
 
   UserModel copyWith({
+    String? id,
+    String? name,
+    String? password,
+    String? address,
     String? email,
-    String? displayName,
-    String? phoneNumber,
     String? photoUrl,
-    String? uid,
+    List<dynamic>? cart,
   }) {
     return UserModel(
       email: email ?? this.email,
-      displayName: displayName ?? this.displayName,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
+      name: name ?? this.name,
+      id: id ?? this.id,
       photoUrl: photoUrl ?? this.photoUrl,
-      uid: uid ?? this.uid,
+      address: address ?? this.address,
+      cart: cart ?? this.cart,
     );
   }
 
-  Map<String, dynamic> toMap() {
+  static Map<String, dynamic> toMap({
+    required UserModel userModel,
+  }) {
     return <String, dynamic>{
-      'email': email,
-      'displayName': displayName,
-      'phoneNumber': phoneNumber,
-      'photoUrl': photoUrl,
-      'uid': uid,
+      'email': userModel.email,
+      'name': userModel.name,
+      'id': userModel.id,
+      'photoUrl': userModel.photoUrl,
+      'address': userModel.address,
+      'cart': userModel.cart,
     };
   }
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
       email: map['email'] ?? '',
-      displayName: map['displayName'] ?? '',
-      phoneNumber: map['phoneNumber'] ?? '',
+      name: map['name'] ?? '',
+      id: map['id'] ?? '',
       photoUrl: map['photoUrl'] ?? '',
-      uid: map['uid'] ?? '',
+      address: map['address'] ?? '',
+      cart: map['cart'] ?? [],
     );
   }
 
-  @override
-  String toString() {
-    return 'emailUser(email: $email, displayName: $displayName, phoneNumber: $phoneNumber, photoUrl: $photoUrl, uid: $uid)';
-  }
+  // @override
+  // String toString() {
+  //   return 'emailUser(email: $email, displayName: $displayName, phoneNumber: $phoneNumber, photoUrl: $photoUrl, uid: $uid)';
+  // }
 
-  @override
-  bool operator ==(covariant UserModel other) {
-    if (identical(this, other)) return true;
+  // @override
+  // bool operator ==(covariant UserModel other) {
+  //   if (identical(this, other)) return true;
 
-    return other.email == email &&
-        other.displayName == displayName &&
-        other.phoneNumber == phoneNumber &&
-        other.photoUrl == photoUrl &&
-        other.uid == uid;
-  }
+  //   return other.email == email &&
+  //       other.displayName == displayName &&
+  //       other.phoneNumber == phoneNumber &&
+  //       other.photoUrl == photoUrl &&
+  //       other.uid == uid;
+  // }
 
-  @override
-  int get hashCode {
-    return email.hashCode ^
-        displayName.hashCode ^
-        phoneNumber.hashCode ^
-        photoUrl.hashCode ^
-        uid.hashCode;
-  }
+  // @override
+  // int get hashCode {
+  //   return email.hashCode ^
+  //       displayName.hashCode ^
+  //       phoneNumber.hashCode ^
+  //       photoUrl.hashCode ^
+  //       uid.hashCode;
+  // }
 }
 
 

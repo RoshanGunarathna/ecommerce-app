@@ -6,8 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../repository/auth_repository.dart';
 
+//loading notifier
 final userProvider = StateProvider<UserModel?>((ref) => null);
 
+//authControllerProvider
 final authControllerProvider = StateNotifierProvider<AuthController, bool>(
   (ref) => AuthController(
     authRepository: ref.watch(authRepositoryProvider),
@@ -21,11 +23,6 @@ final authStateChangeProvider = StreamProvider(
     return authController.authStateChange;
   }),
 );
-
-final getUserDataProvider = StreamProvider.family((ref, String uid) {
-  final authController = ref.watch(authControllerProvider.notifier);
-  return authController.getUserData(uid);
-});
 
 class AuthController extends StateNotifier<bool> {
   final AuthRepository _authRepository;
@@ -51,7 +48,7 @@ class AuthController extends StateNotifier<bool> {
 //facebook sign-in
   void signInWithFacebook(BuildContext context) async {
     state = true;
-    final user = await _authRepository.signinWithFacebook();
+    final user = await _authRepository.signInWithFacebook();
     state = false;
     user.fold(
       (l) => showSnackBar(context: context, text: l.message),
@@ -60,7 +57,58 @@ class AuthController extends StateNotifier<bool> {
     );
   }
 
-  Stream<UserModel> getUserData(String uid) {
-    return _authRepository.getUserData(uid);
+//email sign-up
+  void signUpWithEmail(
+      {required BuildContext context,
+      required String email,
+      required String password,
+      required String name}) async {
+    state = true;
+    final user = await _authRepository.signUpWithEmail(
+        email: email, password: password, name: name);
+    state = false;
+    user.fold(
+      (l) {
+        print(l.message);
+        showSnackBar(context: context, text: l.message);
+      },
+      (userModel) =>
+          _ref.read(userProvider.notifier).update((state) => userModel),
+    );
+  }
+
+//email sign-in
+  void signInWithEmail({
+    required BuildContext context,
+    required String email,
+    required String password,
+  }) async {
+    state = true;
+    final user = await _authRepository.signInWithEmail(
+      email: email,
+      password: password,
+    );
+    state = false;
+    user.fold(
+      (l) {
+        print(l.message);
+        showSnackBar(context: context, text: l.message);
+      },
+      (userModel) =>
+          _ref.read(userProvider.notifier).update((state) => userModel),
+    );
+  }
+
+//get current user data
+  Future<UserModel?> getUserData(String uid, BuildContext context) async {
+    UserModel? user;
+    final userData = await _authRepository.getUserData(uid);
+    userData.fold(
+      (l) => showSnackBar(context: context, text: l.message),
+      (userModel) {
+        user = userModel;
+      },
+    );
+    return user;
   }
 }

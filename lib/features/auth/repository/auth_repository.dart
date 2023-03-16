@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_app/core/failure.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
@@ -57,22 +58,26 @@ class AuthRepository {
       UserCredential userCredential =
           await _auth.signInWithCredential(credential);
 
-      UserModel userModel;
-
       if (userCredential.additionalUserInfo!.isNewUser) {
-        userModel = UserModel(
-            email: userCredential.user!.email ?? '',
-            displayName: userCredential.user!.displayName ?? '',
-            phoneNumber: userCredential.user!.phoneNumber ?? '',
-            photoUrl: userCredential.user!.photoURL ?? Constants.avatarDefault,
-            uid: userCredential.user!.uid);
-        await _users.doc(userCredential.user!.uid).set(
-              userModel.toMap(),
-            );
+        UserModel userModel = UserModel(
+          email: userCredential.user!.email ?? '',
+          photoUrl: userCredential.user!.photoURL ?? Constants.avatarDefault,
+          address: '',
+          cart: [],
+          id: userCredential.user!.uid,
+          name: userCredential.user!.displayName ?? '',
+        );
+        await _users
+            .doc(userCredential.user!.uid)
+            .set(UserModel.toMap(userModel: userModel));
       } else {
-        userModel = await getUserData(userCredential.user!.uid).first;
+        final user = await getUserData(userCredential.user!.uid);
+        user.fold(
+          (l) => throw l.message,
+          (userModel) => right(userModel),
+        );
       }
-      return right(userModel);
+      throw "null";
     } on FirebaseException catch (e) {
       throw e.message!;
     } catch (e) {
@@ -81,7 +86,7 @@ class AuthRepository {
   }
 
   //Facebook sign-in
-  FutureEither<UserModel> signinWithFacebook() async {
+  FutureEither<UserModel> signInWithFacebook() async {
     try {
       final LoginResult loginResult = await _facebookAuth.login();
 
@@ -94,22 +99,26 @@ class AuthRepository {
       UserCredential userCredential =
           await _auth.signInWithCredential(credential);
 
-      UserModel userModel;
-
       if (userCredential.additionalUserInfo!.isNewUser) {
-        userModel = UserModel(
-            email: userCredential.user!.email ?? '',
-            displayName: userCredential.user!.displayName ?? '',
-            phoneNumber: userCredential.user!.phoneNumber ?? '',
-            photoUrl: userCredential.user!.photoURL ?? Constants.avatarDefault,
-            uid: userCredential.user!.uid);
+        UserModel userModel = UserModel(
+          email: userCredential.user!.email ?? '',
+          photoUrl: userCredential.user!.photoURL ?? Constants.avatarDefault,
+          address: '',
+          cart: [],
+          id: userCredential.user!.uid,
+          name: userCredential.user!.displayName ?? '',
+        );
         await _users.doc(userCredential.user!.uid).set(
-              userModel.toMap(),
+              UserModel.toMap(userModel: userModel),
             );
       } else {
-        userModel = await getUserData(userCredential.user!.uid).first;
+        final user = await getUserData(userCredential.user!.uid);
+        user.fold(
+          (l) => throw l.message,
+          (userModel) => right(userModel),
+        );
       }
-      return right(userModel);
+      throw "null";
     } on FirebaseException catch (e) {
       throw e.message!;
     } catch (e) {
@@ -117,8 +126,101 @@ class AuthRepository {
     }
   }
 
-  Stream<UserModel> getUserData(String uid) {
-    return _users.doc(uid).snapshots().map(
-        (event) => UserModel.fromMap(event.data() as Map<String, dynamic>));
+  //Email sign-Up
+  FutureEither<UserModel?> signUpWithEmail(
+      {required String email,
+      required String password,
+      required String name}) async {
+    try {
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (userCredential.user != null) {
+        //get user id
+        final uid = userCredential.user!.uid;
+
+        //create a map for send to the firebase
+        Map<String, dynamic> userMap = UserModel.toMap(
+          userModel: UserModel(
+            id: uid,
+            name: name,
+            address: "",
+            email: email,
+            photoUrl: "",
+            cart: [],
+          ),
+        );
+
+        //save data in firebase
+        await _users.doc(uid).set(userMap);
+
+        //get current user data and return userData to controller
+        UserModel? user;
+        final userData = await getUserData(uid);
+
+        userData.fold(
+          (l) => throw l.message,
+          (userModel) => user = userModel,
+        );
+        return right(user);
+      }
+
+      throw 'null';
+    } on FirebaseException catch (e) {
+      throw e.message!;
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  //Email sign-In
+  FutureEither<UserModel?> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (userCredential.user != null) {
+        //get user id
+        final uid = userCredential.user!.uid;
+
+        //get current user data and return userData to controller
+        UserModel? user;
+        final userData = await getUserData(uid);
+
+        userData.fold(
+          (l) => throw l.message,
+          (userModel) => user = userModel,
+        );
+        return right(user);
+      }
+
+      throw 'user is null';
+    } on FirebaseException catch (e) {
+      throw e.message!;
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+  //get user data
+  FutureEither<UserModel> getUserData(String uid) async {
+    try {
+      UserModel userModel = await _users.doc(uid).get().then(
+          (value) => UserModel.fromMap(value.data() as Map<String, dynamic>));
+
+      return right(userModel);
+    } on FirebaseException catch (e) {
+      throw e.message!;
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
   }
 }
