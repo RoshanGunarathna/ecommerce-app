@@ -1,3 +1,4 @@
+import 'package:ecommerce_app/core/enums/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,6 +7,7 @@ import '../../../core/common/custom_icon_button.dart';
 import '../../../core/common/custom_text_field.dart';
 import '../../../core/constants/assets_path.dart';
 import '../controller/auth_controller.dart';
+import '../widgets/social_button.dart';
 import 'sign_in_screen.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
@@ -27,7 +29,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     );
   }
 
-  void signUp() {
+  void emailSignUp() {
     if (_nameController.text.isNotEmpty &&
         _passwordController.text.isNotEmpty &&
         _emailController.text.isNotEmpty) {
@@ -113,7 +115,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               width: MediaQuery.of(context).size.width,
               child: CustomButton(
                 text: "Sign Up",
-                onPressed: signUp,
+                onPressed: emailSignUp,
               ),
             ),
             const SizedBox(height: 15),
@@ -128,24 +130,22 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             // Icon Row
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CustomIconButton(
+              children: const [
+                SizedBox(width: 10),
+                SocialButton(
                     iconPath: facebookPath,
-                    IconSize: 17,
-                    onPressed: () async {
-                      final user = ref.read(userProvider);
-                      if (user != null) {
-                        print(user.name);
-                      } else {
-                        print('user is null');
-                      }
-                    }),
-                const SizedBox(width: 10),
-                CustomIconButton(
-                    iconPath: googlePath, IconSize: 17, onPressed: () {}),
-                const SizedBox(width: 10),
-                CustomIconButton(
-                    iconPath: linkedInPath, IconSize: 17, onPressed: () {}),
+                    label: '',
+                    socialButtonType: SocialButtonType.facebook),
+                SizedBox(width: 10),
+                SocialButton(
+                    iconPath: googlePath,
+                    label: '',
+                    socialButtonType: SocialButtonType.google),
+                SizedBox(width: 10),
+                SocialButton(
+                    iconPath: linkedInPath,
+                    label: '',
+                    socialButtonType: SocialButtonType.linkedIn),
               ],
             ),
             const SizedBox(height: 15),

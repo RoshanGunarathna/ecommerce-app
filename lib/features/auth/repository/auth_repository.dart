@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_app/core/failure.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:flutter_login_facebook/flutter_login_facebook.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -27,13 +28,13 @@ class AuthRepository {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
-  final FacebookAuth _facebookAuth;
+  final FacebookLogin _facebookAuth;
 
   AuthRepository({
     required FirebaseFirestore firestore,
     required FirebaseAuth auth,
     required GoogleSignIn googleSignIn,
-    required FacebookAuth facebookAuth,
+    required FacebookLogin facebookAuth,
   })  : _auth = auth,
         _firestore = firestore,
         _googleSignIn = googleSignIn,
@@ -45,39 +46,62 @@ class AuthRepository {
   Stream<User?> get authStateChange => _auth.authStateChanges();
 
 //Google sign-in
-  FutureEither<UserModel> signinWithGoogle() async {
+  FutureEither<UserModel?> signinWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       final googleAuth = await googleUser?.authentication;
 
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
-      );
-      UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
+      if (googleAuth != null) {
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
 
-      if (userCredential.additionalUserInfo!.isNewUser) {
-        UserModel userModel = UserModel(
-          email: userCredential.user!.email ?? '',
-          photoUrl: userCredential.user!.photoURL ?? Constants.avatarDefault,
-          address: '',
-          cart: [],
-          id: userCredential.user!.uid,
-          name: userCredential.user!.displayName ?? '',
-        );
-        await _users
-            .doc(userCredential.user!.uid)
-            .set(UserModel.toMap(userModel: userModel));
-      } else {
-        final user = await getUserData(userCredential.user!.uid);
-        user.fold(
-          (l) => throw l.message,
-          (userModel) => right(userModel),
-        );
+        UserCredential userCredential =
+            await _auth.signInWithCredential(credential);
+
+        if (userCredential.user != null) {
+          //get user id
+          final uid = userCredential.user!.uid;
+
+          if (userCredential.additionalUserInfo!.isNewUser) {
+            UserModel userModel = UserModel(
+              email: userCredential.user!.email ?? '',
+              photoUrl:
+                  userCredential.user!.photoURL ?? Constants.avatarDefault,
+              address: '',
+              cart: [],
+              id: uid,
+              name: userCredential.user!.displayName ?? '',
+            );
+            await _users.doc(uid).set(UserModel.toMap(userModel: userModel));
+
+            //get current user data and return userData to controller
+            UserModel? user;
+            final userData = await getUserData(uid);
+
+            userData.fold(
+              (l) => throw l.message,
+              (userModel) => user = userModel,
+            );
+            return right(user);
+          } else {
+            //get current user data and return userData to controller
+            UserModel? user;
+            final userData = await getUserData(uid);
+
+            userData.fold(
+              (l) => throw l.message,
+              (userModel) => user = userModel,
+            );
+            return right(user);
+          }
+          ;
+        }
       }
-      throw "null";
+
+      throw "Google sign-in fail";
     } on FirebaseException catch (e) {
       throw e.message!;
     } catch (e) {
@@ -88,37 +112,41 @@ class AuthRepository {
   //Facebook sign-in
   FutureEither<UserModel> signInWithFacebook() async {
     try {
-      final LoginResult loginResult = await _facebookAuth.login();
+      final FacebookLoginResult loginResult =
+          await _facebookAuth.logIn(permissions: [
+        FacebookPermission.publicProfile,
+        FacebookPermission.email,
+      ]);
 
-      // final googleAuth = await googleUser?.authentication;
-      print(loginResult.status);
+      if (loginResult.status == FacebookLoginStatus.success) {
+        final OAuthCredential credential =
+            FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
-      final OAuthCredential credential =
-          FacebookAuthProvider.credential(loginResult.accessToken!.token);
+        UserCredential userCredential =
+            await _auth.signInWithCredential(credential);
 
-      UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
-
-      if (userCredential.additionalUserInfo!.isNewUser) {
-        UserModel userModel = UserModel(
-          email: userCredential.user!.email ?? '',
-          photoUrl: userCredential.user!.photoURL ?? Constants.avatarDefault,
-          address: '',
-          cart: [],
-          id: userCredential.user!.uid,
-          name: userCredential.user!.displayName ?? '',
-        );
-        await _users.doc(userCredential.user!.uid).set(
-              UserModel.toMap(userModel: userModel),
-            );
-      } else {
-        final user = await getUserData(userCredential.user!.uid);
-        user.fold(
-          (l) => throw l.message,
-          (userModel) => right(userModel),
-        );
+        if (userCredential.additionalUserInfo!.isNewUser) {
+          UserModel userModel = UserModel(
+            email: userCredential.user!.email ?? '',
+            photoUrl: userCredential.user!.photoURL ?? Constants.avatarDefault,
+            address: '',
+            cart: [],
+            id: userCredential.user!.uid,
+            name: userCredential.user!.displayName ?? '',
+          );
+          await _users.doc(userCredential.user!.uid).set(
+                UserModel.toMap(userModel: userModel),
+              );
+        } else {
+          final user = await getUserData(userCredential.user!.uid);
+          user.fold(
+            (l) => throw l.message,
+            (userModel) => right(userModel),
+          );
+        }
       }
-      throw "null";
+
+      throw "${loginResult.status}";
     } on FirebaseException catch (e) {
       throw e.message!;
     } catch (e) {

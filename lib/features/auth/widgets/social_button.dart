@@ -33,30 +33,22 @@ class SocialButton extends ConsumerWidget {
     ref.read(authControllerProvider.notifier).signInWithFacebook(context);
   }
 
+//linkedIn sign-in
+  void signInWithLinkedIn(WidgetRef ref, BuildContext context) {}
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return TextButton.icon(
+    return IconButton(
+      iconSize: 30,
       onPressed: () {
         socialButtonType == SocialButtonType.facebook
             ? signInWithFacebook(ref, context)
-            : signInWithGoogle(ref, context);
+            : socialButtonType == SocialButtonType.google
+                ? signInWithGoogle(ref, context)
+                : signInWithLinkedIn(ref, context);
       },
-      icon: SvgPicture.asset(
+      icon: Image.asset(
         iconPath,
-        width: 25,
-        color: Palette.whiteColor,
-      ),
-      label: Text(label),
-      style: TextButton.styleFrom(
-        padding: EdgeInsets.symmetric(
-            vertical: verticalPadding, horizontal: horizontalPadding),
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(
-            color: Palette.borderColor,
-            width: 3,
-          ),
-          borderRadius: BorderRadius.circular(10),
-        ),
       ),
     );
   }

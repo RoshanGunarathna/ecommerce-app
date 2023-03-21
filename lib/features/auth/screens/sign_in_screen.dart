@@ -5,9 +5,11 @@ import '../../../core/common/custom_button.dart';
 import '../../../core/common/custom_icon_button.dart';
 import '../../../core/common/custom_text_field.dart';
 import '../../../core/constants/assets_path.dart';
+import '../../../core/enums/enums.dart';
 import '../../../core/palette.dart';
 import '../../home/screens/home_screen.dart';
 import '../controller/auth_controller.dart';
+import '../widgets/social_button.dart';
 import 'sign_up_screen.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
@@ -133,24 +135,22 @@ class _SignInScreenConsumerState extends ConsumerState<SignInScreen> {
           // Icon Row
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CustomIconButton(
+            children: const [
+              SizedBox(width: 10),
+              SocialButton(
                   iconPath: facebookPath,
-                  IconSize: 17,
-                  onPressed: () {
-                    final user = ref.read(userProvider);
-                    if (user != null) {
-                      print(user.name);
-                    } else {
-                      print('user is null');
-                    }
-                  }),
-              const SizedBox(width: 10),
-              CustomIconButton(
-                  iconPath: googlePath, IconSize: 17, onPressed: () {}),
-              const SizedBox(width: 10),
-              CustomIconButton(
-                  iconPath: linkedInPath, IconSize: 17, onPressed: () {}),
+                  label: '',
+                  socialButtonType: SocialButtonType.facebook),
+              SizedBox(width: 10),
+              SocialButton(
+                  iconPath: googlePath,
+                  label: '',
+                  socialButtonType: SocialButtonType.google),
+              SizedBox(width: 10),
+              SocialButton(
+                  iconPath: linkedInPath,
+                  label: '',
+                  socialButtonType: SocialButtonType.linkedIn),
             ],
           ),
           const SizedBox(height: 15),

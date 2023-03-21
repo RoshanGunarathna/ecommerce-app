@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../home/screens/home_screen.dart';
 import '../repository/auth_repository.dart';
 
 //loading notifier
@@ -38,11 +39,12 @@ class AuthController extends StateNotifier<bool> {
     state = true;
     final user = await _authRepository.signinWithGoogle();
     state = false;
-    user.fold(
-      (l) => showSnackBar(context: context, text: l.message),
-      (userModel) =>
-          _ref.read(userProvider.notifier).update((state) => userModel),
-    );
+    user.fold((l) => showSnackBar(context: context, text: l.message),
+        (userModel) {
+      _ref.read(userProvider.notifier).update((state) => userModel);
+      Navigator.pushNamedAndRemoveUntil(
+          context, HomeScreen.routeName, (route) => false);
+    });
   }
 
 //facebook sign-in
@@ -50,11 +52,12 @@ class AuthController extends StateNotifier<bool> {
     state = true;
     final user = await _authRepository.signInWithFacebook();
     state = false;
-    user.fold(
-      (l) => showSnackBar(context: context, text: l.message),
-      (userModel) =>
-          _ref.read(userProvider.notifier).update((state) => userModel),
-    );
+    user.fold((l) => showSnackBar(context: context, text: l.message),
+        (userModel) {
+      _ref.read(userProvider.notifier).update((state) => userModel);
+      Navigator.pushNamedAndRemoveUntil(
+          context, HomeScreen.routeName, (route) => false);
+    });
   }
 
 //email sign-up
@@ -67,14 +70,14 @@ class AuthController extends StateNotifier<bool> {
     final user = await _authRepository.signUpWithEmail(
         email: email, password: password, name: name);
     state = false;
-    user.fold(
-      (l) {
-        print(l.message);
-        showSnackBar(context: context, text: l.message);
-      },
-      (userModel) =>
-          _ref.read(userProvider.notifier).update((state) => userModel),
-    );
+    user.fold((l) {
+      print(l.message);
+      showSnackBar(context: context, text: l.message);
+    }, (userModel) {
+      _ref.read(userProvider.notifier).update((state) => userModel);
+      Navigator.pushNamedAndRemoveUntil(
+          context, HomeScreen.routeName, (route) => false);
+    });
   }
 
 //email sign-in
@@ -94,8 +97,11 @@ class AuthController extends StateNotifier<bool> {
         print(l.message);
         showSnackBar(context: context, text: l.message);
       },
-      (userModel) =>
-          _ref.read(userProvider.notifier).update((state) => userModel),
+      (userModel) {
+        _ref.read(userProvider.notifier).update((state) => userModel);
+        Navigator.pushNamedAndRemoveUntil(
+            context, HomeScreen.routeName, (route) => false);
+      },
     );
   }
 
