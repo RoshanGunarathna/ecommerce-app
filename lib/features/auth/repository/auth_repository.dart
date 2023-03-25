@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:easy_linkedin_login/easy_linkedin_login.dart';
 import 'package:ecommerce_app/core/failure.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -12,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:linkedin_login/linkedin_login.dart';
 
 import '../../../core/constants/constants.dart';
 import '../../../core/constants/firebase_constants.dart';
@@ -268,10 +268,10 @@ class AuthRepository {
         ),
       ),
     );
-    while (isAuthOver) {
-      //do nothing
-      print(isAuthOver);
-    }
+    // while (isAuthOver) {
+    //   //do nothing
+    //   print(isAuthOver);
+    // }
     print('****auth is over...');
     return error != null ? left(Failure(error.toString())) : right(user!);
   }
