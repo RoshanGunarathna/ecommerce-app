@@ -1,7 +1,7 @@
-import 'package:ecommerce_app/features/auth/screens/new_start_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/assets_path.dart';
+
 import 'sign_up_screen.dart';
 
 class SplashScreen extends StatefulWidget {

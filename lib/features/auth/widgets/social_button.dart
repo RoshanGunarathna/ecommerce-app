@@ -1,9 +1,11 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
+import 'package:easy_linkedin_login/easy_linkedin_login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/constants/keys.dart';
 import '../../../core/enums/enums.dart';
 import '../../../theme/pallete.dart';
 import '../controller/auth_controller.dart';
@@ -14,8 +16,10 @@ class SocialButton extends ConsumerWidget {
   final double horizontalPadding;
   final double verticalPadding;
   final SocialButtonType socialButtonType;
+  final BuildContext ctx;
   const SocialButton(
       {Key? key,
+      required this.ctx,
       required this.iconPath,
       required this.label,
       required this.socialButtonType,
@@ -34,7 +38,9 @@ class SocialButton extends ConsumerWidget {
   }
 
 //linkedIn sign-in
-  void signInWithLinkedIn(WidgetRef ref, BuildContext context) {}
+  void signInWithLinkedIn(WidgetRef ref, BuildContext context) {
+    ref.read(authControllerProvider.notifier).signInWithLinkedin(context);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,7 +51,7 @@ class SocialButton extends ConsumerWidget {
             ? signInWithFacebook(ref, context)
             : socialButtonType == SocialButtonType.google
                 ? signInWithGoogle(ref, context)
-                : signInWithLinkedIn(ref, context);
+                : signInWithLinkedIn(ref, ctx);
       },
       icon: Image.asset(
         iconPath,

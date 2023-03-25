@@ -52,6 +52,8 @@ dependencies:
   scroll_navigation: ^1.3.2
   carousel_slider: ^4.2.1
   flutter_login_facebook: ^1.7.0
+  easy_linkedin_login: ^1.0.3
+  
 
 
 

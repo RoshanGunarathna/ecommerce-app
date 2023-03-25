@@ -60,6 +60,20 @@ class AuthController extends StateNotifier<bool> {
     });
   }
 
+  //LinkedIn sign-in
+  Future signInWithLinkedin(BuildContext context) async {
+    state = true;
+    final user = await _authRepository.signInWithLinkedIn(context: context);
+    state = false;
+    user.fold((l) => showSnackBar(context: context, text: l.message),
+        (userModel) {
+      _ref.read(userProvider.notifier).update((state) => userModel);
+      print(userModel.name);
+      // Navigator.pushNamedAndRemoveUntil(
+      //     context, HomeScreen.routeName, (route) => false);
+    });
+  }
+
 //email sign-up
   void signUpWithEmail(
       {required BuildContext context,

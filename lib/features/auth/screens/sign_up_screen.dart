@@ -130,19 +130,22 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             // Icon Row
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 SizedBox(width: 10),
                 SocialButton(
+                    ctx: context,
                     iconPath: facebookPath,
                     label: '',
                     socialButtonType: SocialButtonType.facebook),
                 SizedBox(width: 10),
                 SocialButton(
+                    ctx: context,
                     iconPath: googlePath,
                     label: '',
                     socialButtonType: SocialButtonType.google),
                 SizedBox(width: 10),
                 SocialButton(
+                    ctx: context,
                     iconPath: linkedInPath,
                     label: '',
                     socialButtonType: SocialButtonType.linkedIn),

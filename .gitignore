@@ -49,3 +49,6 @@ app.*.map.json
 /macos/
 /web/
 /windows/
+/lib/core/constants/keys.dart
+
+

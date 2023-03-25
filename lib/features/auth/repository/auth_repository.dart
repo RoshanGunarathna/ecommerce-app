@@ -1,7 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'package:easy_linkedin_login/easy_linkedin_login.dart';
 import 'package:ecommerce_app/core/failure.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
+
+import 'package:flutter/material.dart';
+
 import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +15,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../core/constants/constants.dart';
 import '../../../core/constants/firebase_constants.dart';
+import '../../../core/constants/keys.dart';
 import '../../../core/providers/firebase_providers.dart';
 import '../../../core/type_defs.dart';
 import '../../../model/user.dart';
@@ -110,7 +115,7 @@ class AuthRepository {
   }
 
   //Facebook sign-in
-  FutureEither<UserModel> signInWithFacebook() async {
+  FutureEither<UserModel?> signInWithFacebook() async {
     try {
       final FacebookLoginResult loginResult =
           await _facebookAuth.logIn(permissions: [
@@ -125,24 +130,43 @@ class AuthRepository {
         UserCredential userCredential =
             await _auth.signInWithCredential(credential);
 
-        if (userCredential.additionalUserInfo!.isNewUser) {
-          UserModel userModel = UserModel(
-            email: userCredential.user!.email ?? '',
-            photoUrl: userCredential.user!.photoURL ?? Constants.avatarDefault,
-            address: '',
-            cart: [],
-            id: userCredential.user!.uid,
-            name: userCredential.user!.displayName ?? '',
-          );
-          await _users.doc(userCredential.user!.uid).set(
-                UserModel.toMap(userModel: userModel),
-              );
-        } else {
-          final user = await getUserData(userCredential.user!.uid);
-          user.fold(
-            (l) => throw l.message,
-            (userModel) => right(userModel),
-          );
+        if (userCredential.user != null) {
+          //get user id
+          final uid = userCredential.user!.uid;
+          if (userCredential.additionalUserInfo!.isNewUser) {
+            UserModel userModel = UserModel(
+              email: userCredential.user!.email ?? '',
+              photoUrl:
+                  userCredential.user!.photoURL ?? Constants.avatarDefault,
+              address: '',
+              cart: [],
+              id: userCredential.user!.uid,
+              name: userCredential.user!.displayName ?? '',
+            );
+            await _users.doc(userCredential.user!.uid).set(
+                  UserModel.toMap(userModel: userModel),
+                );
+
+            //get current user data and return userData to controller
+            UserModel? user;
+            final userData = await getUserData(uid);
+
+            userData.fold(
+              (l) => throw l.message,
+              (userModel) => user = userModel,
+            );
+            return right(user);
+          } else {
+            //get current user data and return userData to controller
+            UserModel? user;
+            final userData = await getUserData(uid);
+
+            userData.fold(
+              (l) => throw l.message,
+              (userModel) => user = userModel,
+            );
+            return right(user);
+          }
         }
       }
 
@@ -152,6 +176,104 @@ class AuthRepository {
     } catch (e) {
       return left(Failure(e.toString()));
     }
+  }
+
+  //LinkedIn sign-in
+  FutureEither<UserModel> signInWithLinkedIn(
+      {required BuildContext context}) async {
+    UserModel? user;
+    String? error;
+    BuildContext? ctx;
+    bool isAuthOver = false;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (BuildContext context) => LinkedInUserWidget(
+          redirectUrl: linkedinRedirectURL,
+          clientId: linkedinClientID,
+          clientSecret: linkedinClientSecret,
+          onGetUserProfile: (UserSucceededAction linkedInUser) async {
+            try {
+              if (linkedInUser.user.token.accessToken != null) {
+                UserCredential userCredential = await _auth
+                    .signInWithCustomToken(linkedInUser.user.userId!);
+
+                if (userCredential.user != null) {
+                  //get user id
+                  final uid = userCredential.user!.uid;
+
+                  if (userCredential.additionalUserInfo!.isNewUser) {
+                    UserModel userModel = UserModel(
+                      email: linkedInUser
+                          .user.email!.elements![0].handleDeep!.emailAddress!,
+                      photoUrl: linkedInUser
+                              .user
+                              .profilePicture!
+                              .displayImageContent!
+                              .elements![0]
+                              .identifiers![0]
+                              .identifier ??
+                          Constants.avatarDefault,
+                      address: '',
+                      cart: [],
+                      id: userCredential.user!.uid,
+                      name:
+                          "${linkedInUser.user.firstName!.localized!.label} ${linkedInUser.user.lastName!.localized!.label}",
+                    );
+                    await _users.doc(userCredential.user!.uid).set(
+                          UserModel.toMap(userModel: userModel),
+                        );
+                    //get current user data and return userData to controller
+                    final userData = await getUserData(uid);
+
+                    //Assign values to local variable and after class will return model or error
+                    userData.fold(
+                      (l) => error = l.message,
+                      (userModel) => user = userModel,
+                    );
+                    ctx = context;
+                    isAuthOver = true;
+
+                    return null;
+                  } else {
+                    //get current user data and return userData to controller
+                    final userData = await getUserData(uid);
+
+                    //Assign values to local variable and after class will return model or error
+                    userData.fold(
+                      (l) => error = l.message,
+                      (userModel) => user = userModel,
+                    );
+                    ctx = context;
+                    isAuthOver = true;
+
+                    return null;
+                  }
+                }
+              }
+            } catch (e) {
+              error = e.toString();
+              ctx = context;
+              isAuthOver = true;
+              return null;
+            }
+          },
+          onError: (UserFailedAction e) {
+            error = e.toString();
+            ctx = context;
+            isAuthOver = true;
+            return null;
+          },
+        ),
+      ),
+    );
+    while (isAuthOver) {
+      //do nothing
+      print(isAuthOver);
+    }
+    print('****auth is over...');
+    return error != null ? left(Failure(error.toString())) : right(user!);
   }
 
   //Email sign-Up

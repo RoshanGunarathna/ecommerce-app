@@ -66,7 +66,9 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
               ),
               Text(
                 "Hello ${user.name}",
-                style: const TextStyle(fontSize: 15),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(
                 height: 10,
