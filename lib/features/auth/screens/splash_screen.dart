@@ -1,46 +1,55 @@
+import 'package:ecommerce_app/features/auth/controller/auth_controller.dart';
+import 'package:ecommerce_app/features/home/screens/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/common/error_text.dart';
 import '../../../core/constants/assets_path.dart';
 
+import '../../../model/user.dart';
 import 'sign_up_screen.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenConsumerState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-//In this state we will initialize the auth part
-  Future<void> appStartInit() async {
-    Future.delayed(
-      const Duration(seconds: 3),
-    ).then(
-      (value) => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const SignUpScreen(),
-        ),
-      ),
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    appStartInit();
+class _SplashScreenConsumerState extends ConsumerState<SplashScreen> {
+  UserModel? userModel;
+  void getData(WidgetRef ref, User data) async {
+    userModel = await ref
+        .watch(authControllerProvider.notifier)
+        .getUserData(data.uid, context);
+    ref.read(userProvider.notifier).update((state) => userModel);
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Image.asset(logoPath),
-        ),
-      ),
-    );
+    return ref.watch(authStateChangeProvider).when(
+          data: (data) {
+            if (data != null) {
+              getData(ref, data);
+              if (userModel != null) {
+                return const HomeScreen();
+              }
+            }
+            return const SignUpScreen();
+          },
+          error: (error, stackTrace) => ErrorText(error: error.toString()),
+          loading: () {
+            return Scaffold(
+              body: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Image.asset(logoPath),
+                ),
+              ),
+            );
+          },
+        );
   }
 }

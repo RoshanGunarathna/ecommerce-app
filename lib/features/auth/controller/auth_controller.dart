@@ -3,6 +3,7 @@ import 'package:ecommerce_app/model/user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:linkedin_login/linkedin_login.dart';
 
 import '../../home/screens/home_screen.dart';
 import '../repository/auth_repository.dart';
@@ -32,6 +33,8 @@ class AuthController extends StateNotifier<bool> {
       : _authRepository = authRepository,
         _ref = ref,
         super(false);
+
+  //check UserStateChanges
   Stream<User?> get authStateChange => _authRepository.authStateChange;
 
 //google sign-in
@@ -60,17 +63,22 @@ class AuthController extends StateNotifier<bool> {
     });
   }
 
+//** NEED TO DEVELOP **//
   //LinkedIn sign-in
-  Future signInWithLinkedin(BuildContext context) async {
+  Future signInWithLinkedin({
+    required UserSucceededAction linkedInUser,
+    required BuildContext context,
+  }) async {
     state = true;
-    final user = await _authRepository.signInWithLinkedIn(context: context);
+    final user = await _authRepository.signInWithLinkedIn(
+        context: context, linkedInUser: linkedInUser);
     state = false;
     user.fold((l) => showSnackBar(context: context, text: l.message),
         (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
-      print(userModel.name);
-      // Navigator.pushNamedAndRemoveUntil(
-      //     context, HomeScreen.routeName, (route) => false);
+
+      Navigator.pushNamedAndRemoveUntil(
+          context, HomeScreen.routeName, (route) => false);
     });
   }
 
@@ -130,5 +138,10 @@ class AuthController extends StateNotifier<bool> {
       },
     );
     return user;
+  }
+
+  //linkedIN error handling
+  void linkedInErrorHandling({required String error}) {
+    print("Linkedin Error: error");
   }
 }

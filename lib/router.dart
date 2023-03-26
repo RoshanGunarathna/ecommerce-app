@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'core/common/widgets/error_text.dart';
+import 'core/common/error_text.dart';
+
 import 'features/home/screens/home_screen.dart';
 
 Route<dynamic> generateRoute(RouteSettings routeSettings) {

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:ecommerce_app/core/failure.dart';
@@ -19,6 +21,7 @@ import '../../../core/constants/keys.dart';
 import '../../../core/providers/firebase_providers.dart';
 import '../../../core/type_defs.dart';
 import '../../../model/user.dart';
+import '../screens/sign_up_screen.dart';
 
 final authRepositoryProvider = Provider(
   (ref) => AuthRepository(
@@ -178,102 +181,64 @@ class AuthRepository {
     }
   }
 
+//** NEED TO DEVELOP **//
   //LinkedIn sign-in
-  FutureEither<UserModel> signInWithLinkedIn(
-      {required BuildContext context}) async {
-    UserModel? user;
-    String? error;
-    BuildContext? ctx;
-    bool isAuthOver = false;
+  FutureEither<UserModel?> signInWithLinkedIn(
+      {required BuildContext context,
+      required UserSucceededAction linkedInUser}) async {
+    try {
+      if (linkedInUser.user.token.accessToken != null) {
+        UserCredential userCredential =
+            await _auth.createUserWithEmailAndPassword(
+                email: linkedInUser
+                    .user.email!.elements![0].handleDeep!.emailAddress!,
+                password: linkedInUser.user.userId!);
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (BuildContext context) => LinkedInUserWidget(
-          redirectUrl: linkedinRedirectURL,
-          clientId: linkedinClientID,
-          clientSecret: linkedinClientSecret,
-          onGetUserProfile: (UserSucceededAction linkedInUser) async {
-            try {
-              if (linkedInUser.user.token.accessToken != null) {
-                UserCredential userCredential = await _auth
-                    .signInWithCustomToken(linkedInUser.user.userId!);
+        if (userCredential.user != null) {
+          //get user id
+          final uid = userCredential.user!.uid;
 
-                if (userCredential.user != null) {
-                  //get user id
-                  final uid = userCredential.user!.uid;
+          //create a map for send to the firebase
+          Map<String, dynamic> userMap = UserModel.toMap(
+              userModel: UserModel(
+            email:
+                linkedInUser.user.email!.elements![0].handleDeep!.emailAddress!,
+            photoUrl: linkedInUser.user.profilePicture != null
+                ? linkedInUser.user.profilePicture!.displayImageContent!
+                    .elements![0].identifiers![0].identifier
+                    .toString()
+                : Constants.avatarDefault,
+            address: '',
+            cart: [],
+            id: uid,
+            name:
+                "${linkedInUser.user.firstName!.localized!.label} ${linkedInUser.user.lastName!.localized!.label}",
+          ));
 
-                  if (userCredential.additionalUserInfo!.isNewUser) {
-                    UserModel userModel = UserModel(
-                      email: linkedInUser
-                          .user.email!.elements![0].handleDeep!.emailAddress!,
-                      photoUrl: linkedInUser
-                              .user
-                              .profilePicture!
-                              .displayImageContent!
-                              .elements![0]
-                              .identifiers![0]
-                              .identifier ??
-                          Constants.avatarDefault,
-                      address: '',
-                      cart: [],
-                      id: userCredential.user!.uid,
-                      name:
-                          "${linkedInUser.user.firstName!.localized!.label} ${linkedInUser.user.lastName!.localized!.label}",
-                    );
-                    await _users.doc(userCredential.user!.uid).set(
-                          UserModel.toMap(userModel: userModel),
-                        );
-                    //get current user data and return userData to controller
-                    final userData = await getUserData(uid);
+          //save data in firebase
+          await _users.doc(uid).set(userMap);
 
-                    //Assign values to local variable and after class will return model or error
-                    userData.fold(
-                      (l) => error = l.message,
-                      (userModel) => user = userModel,
-                    );
-                    ctx = context;
-                    isAuthOver = true;
+          //get current user data and return userData to controller
+          UserModel? user;
+          final userData = await getUserData(uid);
 
-                    return null;
-                  } else {
-                    //get current user data and return userData to controller
-                    final userData = await getUserData(uid);
+          userData.fold(
+            (l) => throw l.message,
+            (userModel) => user = userModel,
+          );
 
-                    //Assign values to local variable and after class will return model or error
-                    userData.fold(
-                      (l) => error = l.message,
-                      (userModel) => user = userModel,
-                    );
-                    ctx = context;
-                    isAuthOver = true;
+          return right(user);
+        } else {
+          throw "user is Null";
+        }
+      }
 
-                    return null;
-                  }
-                }
-              }
-            } catch (e) {
-              error = e.toString();
-              ctx = context;
-              isAuthOver = true;
-              return null;
-            }
-          },
-          onError: (UserFailedAction e) {
-            error = e.toString();
-            ctx = context;
-            isAuthOver = true;
-            return null;
-          },
-        ),
-      ),
-    );
-    // while (isAuthOver) {
-    //   //do nothing
-    //   print(isAuthOver);
-    // }
-    print('****auth is over...');
-    return error != null ? left(Failure(error.toString())) : right(user!);
+      throw "user is Null";
+    } on FirebaseException catch (e) {
+      throw e.message!;
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
   }
 
   //Email sign-Up
