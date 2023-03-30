@@ -1,14 +1,15 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:ecommerce_app/model/product.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/palette.dart';
 
 class ProductCard extends StatelessWidget {
-  final String image;
+  final ProductModel product;
 
   const ProductCard({
     Key? key,
-    required this.image,
+    required this.product,
   }) : super(key: key);
 
   @override
@@ -30,35 +31,33 @@ class ProductCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                   child: Image.network(
-                    image,
+                    product.images[0],
                     fit: BoxFit.fitHeight,
                   ),
                 ),
-                Container(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Container(
-                          height: 35,
-                          width: 35,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30),
-                            color: primaryColor.withOpacity(0.08),
-                          ),
-                          child: IconButton(
-                            alignment: Alignment.center,
-                            padding: const EdgeInsets.all(0),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 35,
+                        width: 35,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          color: primaryColor.withOpacity(0.08),
+                        ),
+                        child: IconButton(
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.all(0),
+                          color: primaryColor,
+                          onPressed: () {},
+                          icon: const Icon(
+                            Icons.favorite_outline_rounded,
                             color: primaryColor,
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.favorite_outline_rounded,
-                              color: primaryColor,
-                            ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -76,29 +75,29 @@ class ProductCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Graps',
-                        style: TextStyle(
+                        product.name,
+                        style: const TextStyle(
                             color: blackColorShade1,
                             fontSize: 15,
                             fontWeight: FontWeight.bold),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 3,
                       ),
                       RichText(
                         text: TextSpan(
-                            text: '\$3.00',
-                            style: TextStyle(
+                            text: '\$${product.price}',
+                            style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                                 color: primaryColor),
                             children: const <TextSpan>[
                               TextSpan(
-                                  text: ' / kg',
+                                  text: '',
                                   style: TextStyle(color: blackColorShade1))
                             ]),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 8,
                       )
                     ],

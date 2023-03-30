@@ -25,10 +25,10 @@ import '../screens/sign_up_screen.dart';
 
 final authRepositoryProvider = Provider(
   (ref) => AuthRepository(
-    firestore: ref.read(firestoreProvider),
-    auth: ref.read(authProvider),
-    googleSignIn: ref.read(googleSigninProvider),
-    facebookAuth: ref.read(facebookSigninProvider),
+    firestore: ref.watch(firestoreProvider),
+    auth: ref.watch(authProvider),
+    googleSignIn: ref.watch(googleSigninProvider),
+    facebookAuth: ref.watch(facebookSigninProvider),
   ),
 );
 

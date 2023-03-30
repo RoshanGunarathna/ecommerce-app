@@ -1,5 +1,5 @@
 import 'package:ecommerce_app/features/auth/controller/auth_controller.dart';
-import 'package:ecommerce_app/features/home/screens/home_screen.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +8,7 @@ import '../../../core/common/error_text.dart';
 import '../../../core/constants/assets_path.dart';
 
 import '../../../model/user.dart';
+import '../../home/widgets/bottom_bar.dart';
 import 'sign_up_screen.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -34,7 +35,7 @@ class _SplashScreenConsumerState extends ConsumerState<SplashScreen> {
             if (data != null) {
               getData(ref, data);
               if (userModel != null) {
-                return const HomeScreen();
+                return const BottomBar();
               }
             }
             return const SignUpScreen();

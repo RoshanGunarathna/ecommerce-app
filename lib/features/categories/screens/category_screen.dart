@@ -3,9 +3,8 @@ import 'package:scroll_navigation/scroll_navigation.dart';
 
 import '../../../core/palette.dart';
 import '../../home/widgets/bottom_bar.dart';
-import '../services/image_services.dart';
-import '../widgets/customGridView.dart';
 
+import '../widgets/productStreamBuilder.dart';
 import '../widgets/search.dart';
 
 class CategoryScreen extends StatefulWidget {
@@ -16,23 +15,6 @@ class CategoryScreen extends StatefulWidget {
 }
 
 class _CategoryScreenState extends State<CategoryScreen> {
-  final List<String> images = [];
-
-  void getImages() async {
-    final ImageServices imageServices = ImageServices();
-    final List<String> imgUrl = await imageServices.getRandomImages();
-    images.addAll(imgUrl);
-    setState(() {
-      images;
-    });
-  }
-
-  @override
-  void initState() {
-    getImages();
-    super.initState();
-  }
-
   void backtoHome() {
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => const BottomBar()));
@@ -75,21 +57,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
             activeColor: blackColor,
             padding: EdgeInsets.all(3),
             spaceBetween: 30),
-        titles: const [
-          "All",
-          "Fruits",
-          "Drinks",
-          "Vegetables",
-          "Meat",
-          "other"
-        ],
-        pages: [
-          CustomGridView(isHomeScreen: false, images: images),
-          CustomGridView(isHomeScreen: false, images: images),
-          CustomGridView(isHomeScreen: false, images: images),
-          CustomGridView(isHomeScreen: false, images: images),
-          CustomGridView(isHomeScreen: false, images: images),
-          CustomGridView(isHomeScreen: false, images: images),
+        titles: const ["All", "Fruits", "Drinks", "Vegetable", "Meat", "other"],
+        pages: const [
+          ProductStramBuilder(),
+          ProductStramBuilder(categoryName: "Fruits"),
+          ProductStramBuilder(categoryName: "Drinks"),
+          ProductStramBuilder(categoryName: "Vegetable"),
+          ProductStramBuilder(categoryName: "Meat"),
+          ProductStramBuilder(categoryName: "other"),
         ],
       ),
     );

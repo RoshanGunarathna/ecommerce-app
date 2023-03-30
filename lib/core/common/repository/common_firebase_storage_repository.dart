@@ -4,9 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 
-import '../../../core/failure.dart';
-import '../../../core/providers/firebase_providers.dart';
-import '../../../core/type_defs.dart';
+import '../../failure.dart';
+import '../../providers/firebase_providers.dart';
+import '../../type_defs.dart';
 
 final firebaseStorageCommonRepositoryProvider = Provider(
   (ref) => FirebaseStorageCommonRepository(
