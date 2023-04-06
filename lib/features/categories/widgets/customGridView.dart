@@ -6,7 +6,7 @@ import 'product_card.dart';
 
 class CustomGridView extends StatelessWidget {
   final String? categoryName;
-  final List<ProductModel> productList;
+  final List<ProductModel?> productList;
   const CustomGridView({
     Key? key,
     this.categoryName,
@@ -15,10 +15,11 @@ class CustomGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isProductNull = productList[0] == null;
     return SingleChildScrollView(
       child: Column(
         children: [
-          (categoryName != null)
+          (categoryName != null && isProductNull == false)
               ? Container(
                   alignment: Alignment.topLeft,
                   padding: const EdgeInsets.only(
@@ -32,27 +33,49 @@ class CustomGridView extends StatelessWidget {
                   ),
                 )
               : const SizedBox(),
-          SizedBox(
-            height: 460,
-            child: GridView.builder(
-              scrollDirection: Axis.horizontal,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  mainAxisExtent: 220,
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 15,
-                  mainAxisSpacing: 15),
-              itemCount: productList.length,
-              itemBuilder: (context, index) {
-                final product = productList[index];
-                return GestureDetector(
-                  onTap: (() {}),
-                  child: ProductCard(
-                    product: product,
+          isProductNull == false
+              ? SizedBox(
+                  height: 460,
+                  child: GridView.builder(
+                    scrollDirection: Axis.horizontal,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                            mainAxisExtent: 220,
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 15,
+                            mainAxisSpacing: 15),
+                    itemCount: productList.length,
+                    itemBuilder: (context, index) {
+                      final product = productList[index];
+                      return GestureDetector(
+                        onTap: (() {}),
+                        child: ProductCard(
+                          product: product!,
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-          ),
+                )
+              : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      SizedBox(
+                        height: 120,
+                        width: 120,
+                        child: Icon(
+                          Icons.mood_bad_rounded,
+                          size: 100,
+                          color: Color.fromARGB(255, 226, 226, 226),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text('No products'),
+                    ],
+                  ),
+                ),
         ],
       ),
     );

@@ -1,23 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scroll_navigation/scroll_navigation.dart';
 
+import '../../../core/common/controller/common_get_category_controller.dart';
 import '../../../core/palette.dart';
+import '../../../model/category_model.dart';
 import '../../home/widgets/bottom_bar.dart';
 
+import '../controller/category_controller.dart';
 import '../widgets/productStreamBuilder.dart';
 import '../widgets/search.dart';
 
-class CategoryScreen extends StatefulWidget {
+class CategoryScreen extends ConsumerStatefulWidget {
   const CategoryScreen({super.key});
 
   @override
-  State<CategoryScreen> createState() => _CategoryScreenState();
+  ConsumerState<CategoryScreen> createState() => _CategoryScreenConsumerState();
 }
 
-class _CategoryScreenState extends State<CategoryScreen> {
+class _CategoryScreenConsumerState extends ConsumerState<CategoryScreen> {
   void backtoHome() {
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => const BottomBar()));
+  }
+
+  //for category part
+  List<CategoryModel> _categoryList = [];
+  List<String> _categoryListNameStrings = ["All"];
+  List<Widget> _pageList = [
+    ProductStramBuilder(),
+  ];
+
+  void refreshCategoryList() async {
+    final isOver = await ref
+        .read(categoryControllerProvider.notifier)
+        .getCategoryData(context);
+
+    if (isOver) {
+      _categoryList = await ref.read(categoryProvider)!;
+
+      setState(() {
+        _categoryListNameStrings
+            .addAll(_categoryList.map((e) => e.name).toList());
+        _pageList.addAll(_categoryList
+            .map((e) => ProductStramBuilder(
+                  categoryName: e.name,
+                ))
+            .toList());
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      refreshCategoryList();
+    });
+    // TODO: implement initState
+    super.initState();
   }
 
   @override
@@ -47,26 +88,21 @@ class _CategoryScreenState extends State<CategoryScreen> {
           ],
         ),
       ),
-      body: TitleScrollNavigation(
-        identiferStyle: const NavigationIdentiferStyle(
-            color: blackColor, position: IdentifierPosition.topAndRight),
-        showIdentifier: true,
-        barStyle: const TitleNavigationBarStyle(
-            style: TextStyle(fontSize: 15),
-            elevation: 0,
-            activeColor: blackColor,
-            padding: EdgeInsets.all(3),
-            spaceBetween: 30),
-        titles: const ["All", "Fruits", "Drinks", "Vegetable", "Meat", "other"],
-        pages: const [
-          ProductStramBuilder(),
-          ProductStramBuilder(categoryName: "Fruits"),
-          ProductStramBuilder(categoryName: "Drinks"),
-          ProductStramBuilder(categoryName: "Vegetable"),
-          ProductStramBuilder(categoryName: "Meat"),
-          ProductStramBuilder(categoryName: "other"),
-        ],
-      ),
+      body: _categoryListNameStrings.length > 1
+          ? TitleScrollNavigation(
+              identiferStyle: const NavigationIdentiferStyle(
+                  color: blackColor, position: IdentifierPosition.topAndRight),
+              showIdentifier: true,
+              barStyle: const TitleNavigationBarStyle(
+                  style: TextStyle(fontSize: 15),
+                  elevation: 0,
+                  activeColor: blackColor,
+                  padding: EdgeInsets.all(3),
+                  spaceBetween: 30),
+              titles: _categoryListNameStrings,
+              pages: _pageList,
+            )
+          : const SizedBox(),
     );
   }
 }

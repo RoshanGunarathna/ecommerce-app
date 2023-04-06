@@ -6,9 +6,9 @@ import '../../../core/common/repository/common_product_stream_repository.dart';
 
 import '../../../model/product.dart';
 
-final categoryRepositoryProvider = Provider((ref) => CategoryRepository());
+final homeRepositoryProvider = Provider((ref) => HomeRepository());
 
-class CategoryRepository {
+class HomeRepository {
 //get all product data
   Stream<List<ProductModel>> getAllProductData(Ref ref) {
     return ref.watch(commonProductStreamRepositoryProvider).getAllProductData();
@@ -24,7 +24,16 @@ class CategoryRepository {
         .getCategorizedProductData(category);
   }
 
-  //get category list
+  //get Discounted product data
+  Stream<List<ProductModel>> getDiscountedProductData({
+    required Ref ref,
+  }) {
+    return ref
+        .watch(commonProductStreamRepositoryProvider)
+        .getDiscountedProductData();
+  }
+
+  //get Category list
   Future<bool> getCategoryData(
       {required Ref ref, required BuildContext context}) async {
     return await ref

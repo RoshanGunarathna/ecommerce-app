@@ -1,48 +1,30 @@
+import 'package:ecommerce_app/features/account/controller/account_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/constants/constants.dart';
 import '../../../core/palette.dart';
+import '../../auth/controller/auth_controller.dart';
 import '../../home/widgets/bottom_bar.dart';
 import '../services/user_services.dart';
 
-class AccountScreen extends StatefulWidget {
+class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
 
-  @override
-  State<AccountScreen> createState() => _AccountScreenState();
-}
-
-class _AccountScreenState extends State<AccountScreen> {
-  final List<String> user = [];
-
-  void getUser() async {
-    final UserServices userServices = UserServices();
-    final List<String> userdata = await userServices.getUser();
-
-    user.addAll(userdata);
-
-    setState(() {
-      user;
-    });
-  }
-
-  @override
-  void initState() {
-    getUser();
-    super.initState();
-  }
-
-  void backtoHome() {
+  void backtoHome(BuildContext context) {
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => const BottomBar()));
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(userProvider);
+
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
           leading: IconButton(
-            onPressed: backtoHome,
+            onPressed: () => backtoHome(context),
             icon: const Icon(
               Icons.arrow_back_rounded,
               color: blackColorShade1,
@@ -60,41 +42,41 @@ class _AccountScreenState extends State<AccountScreen> {
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
-                user.length != 0
-                    ? Row(
-                        children: [
-                          SizedBox(
-                            height: 80,
-                            width: 80,
-                            child: CircleAvatar(
-                              radius: 80,
-                              backgroundImage: NetworkImage(user[2]),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user[0],
-                                style: const TextStyle(
-                                    color: blackColorShade1, fontSize: 23),
-                              ),
-                              Text(
-                                user[1],
-                                style: const TextStyle(
-                                    color: blackColorShade1, fontSize: 15),
-                              ),
-                            ],
-                          ),
-                        ],
-                      )
-                    : const SizedBox(),
+                Row(
+                  children: [
+                    SizedBox(
+                      height: 80,
+                      width: 80,
+                      child: CircleAvatar(
+                        radius: 80,
+                        backgroundImage: NetworkImage(user!.photoUrl.isEmpty
+                            ? Constants.avatarDefault
+                            : user.photoUrl),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.name,
+                          style: const TextStyle(
+                              color: blackColorShade1, fontSize: 23),
+                        ),
+                        Text(
+                          user.email,
+                          style: const TextStyle(
+                              color: blackColorShade1, fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
                 const SizedBox(
-                  height: 30,
+                  height: 15,
                 ),
                 Container(
                   decoration: BoxDecoration(

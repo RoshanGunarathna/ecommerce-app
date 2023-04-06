@@ -86,23 +86,15 @@ class AuthRepository {
             await _users.doc(uid).set(UserModel.toMap(userModel: userModel));
 
             //get current user data and return userData to controller
-            UserModel? user;
-            final userData = await getUserData(uid);
-
-            userData.fold(
-              (l) => throw l.message,
-              (userModel) => user = userModel,
-            );
+            final user = await getUserData(
+              uid: uid,
+            ).first;
             return right(user);
           } else {
             //get current user data and return userData to controller
-            UserModel? user;
-            final userData = await getUserData(uid);
-
-            userData.fold(
-              (l) => throw l.message,
-              (userModel) => user = userModel,
-            );
+            final user = await getUserData(
+              uid: uid,
+            ).first;
             return right(user);
           }
           ;
@@ -151,23 +143,15 @@ class AuthRepository {
                 );
 
             //get current user data and return userData to controller
-            UserModel? user;
-            final userData = await getUserData(uid);
-
-            userData.fold(
-              (l) => throw l.message,
-              (userModel) => user = userModel,
-            );
+            final user = await getUserData(
+              uid: uid,
+            ).first;
             return right(user);
           } else {
             //get current user data and return userData to controller
-            UserModel? user;
-            final userData = await getUserData(uid);
-
-            userData.fold(
-              (l) => throw l.message,
-              (userModel) => user = userModel,
-            );
+            final user = await getUserData(
+              uid: uid,
+            ).first;
             return right(user);
           }
         }
@@ -219,14 +203,9 @@ class AuthRepository {
           await _users.doc(uid).set(userMap);
 
           //get current user data and return userData to controller
-          UserModel? user;
-          final userData = await getUserData(uid);
-
-          userData.fold(
-            (l) => throw l.message,
-            (userModel) => user = userModel,
-          );
-
+          final user = await getUserData(
+            uid: uid,
+          ).first;
           return right(user);
         } else {
           throw "user is Null";
@@ -271,15 +250,10 @@ class AuthRepository {
 
         //save data in firebase
         await _users.doc(uid).set(userMap);
-
         //get current user data and return userData to controller
-        UserModel? user;
-        final userData = await getUserData(uid);
-
-        userData.fold(
-          (l) => throw l.message,
-          (userModel) => user = userModel,
-        );
+        final user = await getUserData(
+          uid: uid,
+        ).first;
         return right(user);
       }
 
@@ -307,13 +281,7 @@ class AuthRepository {
         final uid = userCredential.user!.uid;
 
         //get current user data and return userData to controller
-        UserModel? user;
-        final userData = await getUserData(uid);
-
-        userData.fold(
-          (l) => throw l.message,
-          (userModel) => user = userModel,
-        );
+        final user = await getUserData(uid: uid).first;
         return right(user);
       }
 
@@ -326,16 +294,8 @@ class AuthRepository {
   }
 
   //get user data
-  FutureEither<UserModel> getUserData(String uid) async {
-    try {
-      UserModel userModel = await _users.doc(uid).get().then(
-          (value) => UserModel.fromMap(value.data() as Map<String, dynamic>));
-
-      return right(userModel);
-    } on FirebaseException catch (e) {
-      throw e.message!;
-    } catch (e) {
-      return left(Failure(e.toString()));
-    }
+  Stream<UserModel> getUserData({required String uid}) {
+    return _users.doc(uid).snapshots().map(
+        (event) => UserModel.fromMap(event.data() as Map<String, dynamic>));
   }
 }

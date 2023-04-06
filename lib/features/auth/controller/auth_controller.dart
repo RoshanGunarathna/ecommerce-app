@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkedin_login/linkedin_login.dart';
 
 import '../../home/screens/home_screen.dart';
+import '../../home/widgets/bottom_bar.dart';
 import '../repository/auth_repository.dart';
 
 //loading notifier
@@ -25,6 +26,12 @@ final authStateChangeProvider = StreamProvider(
     return authController.authStateChange;
   }),
 );
+
+//get User data
+final getUserDataProvider = StreamProvider.family((ref, String uid) {
+  final authController = ref.watch(authControllerProvider.notifier);
+  return authController.getUserData(uid);
+});
 
 class AuthController extends StateNotifier<bool> {
   final AuthRepository _authRepository;
@@ -46,7 +53,7 @@ class AuthController extends StateNotifier<bool> {
         (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
       Navigator.pushNamedAndRemoveUntil(
-          context, HomeScreen.routeName, (route) => false);
+          context, BottomBar.routeName, (route) => false);
     });
   }
 
@@ -59,7 +66,7 @@ class AuthController extends StateNotifier<bool> {
         (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
       Navigator.pushNamedAndRemoveUntil(
-          context, HomeScreen.routeName, (route) => false);
+          context, BottomBar.routeName, (route) => false);
     });
   }
 
@@ -78,7 +85,7 @@ class AuthController extends StateNotifier<bool> {
       _ref.read(userProvider.notifier).update((state) => userModel);
 
       Navigator.pushNamedAndRemoveUntil(
-          context, HomeScreen.routeName, (route) => false);
+          context, BottomBar.routeName, (route) => false);
     });
   }
 
@@ -98,7 +105,7 @@ class AuthController extends StateNotifier<bool> {
     }, (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
       Navigator.pushNamedAndRemoveUntil(
-          context, HomeScreen.routeName, (route) => false);
+          context, BottomBar.routeName, (route) => false);
     });
   }
 
@@ -128,16 +135,8 @@ class AuthController extends StateNotifier<bool> {
   }
 
 //get current user data
-  Future<UserModel?> getUserData(String uid, BuildContext context) async {
-    UserModel? user;
-    final userData = await _authRepository.getUserData(uid);
-    userData.fold(
-      (l) => showSnackBar(context: context, text: l.message),
-      (userModel) {
-        user = userModel;
-      },
-    );
-    return user;
+  Stream<UserModel> getUserData(String uid) {
+    return _authRepository.getUserData(uid: uid);
   }
 
   //linkedIN error handling

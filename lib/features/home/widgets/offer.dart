@@ -1,13 +1,22 @@
+import 'package:ecommerce_app/model/product.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/palette.dart';
 import 'my_custom_clipper.dart';
 
 class Offer extends StatelessWidget {
-  const Offer({super.key});
+  final ProductModel product;
+  const Offer({
+    super.key,
+    required this.product,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final originalPrice = product.price.round();
+    final afterDiscount = originalPrice - product.discount!;
+    final offerPrecentage =
+        ((originalPrice - afterDiscount) / originalPrice * 100).round();
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -23,9 +32,9 @@ class Offer extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      "Get 15%",
-                      style: TextStyle(
+                    Text(
+                      "Get $offerPrecentage%",
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 17,
                         fontWeight: FontWeight.bold,

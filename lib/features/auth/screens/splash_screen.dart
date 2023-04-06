@@ -23,7 +23,8 @@ class _SplashScreenConsumerState extends ConsumerState<SplashScreen> {
   void getData(WidgetRef ref, User data) async {
     userModel = await ref
         .watch(authControllerProvider.notifier)
-        .getUserData(data.uid, context);
+        .getUserData(data.uid)
+        .first;
     ref.read(userProvider.notifier).update((state) => userModel);
     setState(() {});
   }

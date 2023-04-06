@@ -53,26 +53,7 @@ class ProductStramBuilder extends ConsumerWidget {
                     productList: products, categoryName: categoryName),
               );
             } else {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    SizedBox(
-                      height: 120,
-                      width: 120,
-                      child: Icon(
-                        Icons.mood_bad_rounded,
-                        size: 100,
-                        color: Color.fromARGB(255, 226, 226, 226),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text('No products'),
-                  ],
-                ),
-              );
+              return const SizedBox();
             }
           }),
     );

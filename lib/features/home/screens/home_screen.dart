@@ -1,12 +1,21 @@
 import 'package:ecommerce_app/features/auth/controller/auth_controller.dart';
 import 'package:ecommerce_app/model/user.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../services/image_services.dart';
-import '../widgets/carouselImage.dart';
+import '../../../core/common/controller/common_get_category_controller.dart';
+import '../../../model/category_model.dart';
+
+import '../../categories/controller/category_controller.dart';
+
+import '../widgets/carouselStreamBuilder.dart';
+import '../widgets/productStreamBuilder.dart';
 import '../widgets/search.dart';
-import '../widgets/customGridView.dart';
+
+final currentTimeProvider = StreamProvider.autoDispose<DateTime>((ref) {
+  return Stream.periodic(const Duration(seconds: 1), (_) => DateTime.now());
+});
 
 class HomeScreen extends ConsumerStatefulWidget {
   static const routeName = '/home';
@@ -17,25 +26,43 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
-  final List<String> images = [];
+  //for category part
+  List<CategoryModel> _categoryList = [];
 
-  void getImages() async {
-    final ImageServices imageServices = ImageServices();
-    final List<String> imgUrl = await imageServices.getRandomImages();
-    images.addAll(imgUrl);
-    setState(() {
-      images;
-    });
+  final List<Widget> _pageList = [
+    const ProductStramBuilder(),
+  ];
+
+  void refreshCategoryList() async {
+    final isOver = await ref
+        .read(categoryControllerProvider.notifier)
+        .getCategoryData(context);
+
+    if (isOver) {
+      _categoryList = await ref.read(categoryProvider)!;
+
+      setState(() {
+        _pageList.addAll(_categoryList
+            .map((e) => ProductStramBuilder(
+                  categoryName: e.name,
+                ))
+            .toList());
+      });
+    }
   }
 
   @override
   void initState() {
-    getImages();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      refreshCategoryList();
+    });
+    // TODO: implement initState
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    print("pageList: ${_pageList.length}");
     final userData = ref.watch(userProvider);
     final UserModel user = userData ??
         UserModel(
@@ -60,32 +87,13 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
           padding: const EdgeInsets.all(15.0),
           child: Column(
             children: [
-              CarouselImage(images: images),
+              const CarouselStramBuilder(),
               const SizedBox(
                 height: 10,
               ),
-              Text(
-                "Hello ${user.name}",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              CustomGridView(
-                images: images,
-                isHomeScreen: true,
-                categoryName: 'Fresh Food',
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              CustomGridView(
-                images: images,
-                isHomeScreen: true,
-                categoryName: 'Vegitables',
-              ),
+              _pageList.length > 1
+                  ? Column(children: _pageList)
+                  : const SizedBox(),
               const SizedBox(
                 height: 10,
               ),

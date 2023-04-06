@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
+import 'package:ecommerce_app/features/categories/widgets/product_card.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../model/category_model.dart';
 import '../../../model/product.dart';
 import '../../constants/firebase_constants.dart';
 
@@ -32,11 +33,29 @@ class CommonProductStreamRepository {
   }
 
   //get Categorized product data
-  Stream<List<ProductModel>> getCategorizedProductData(String category) {
-    return _products.where('category', isEqualTo: [category]).snapshots().map(
-        (querySnapshot) => querySnapshot.docs
-            .map((product) =>
-                ProductModel.fromMap(product.data() as Map<String, dynamic>))
-            .toList());
+  Stream<List<ProductModel?>> getCategorizedProductData(String category) {
+    final productData = _products.snapshots().map((snap) => snap.docs.map((e) {
+          final product =
+              ProductModel.fromMap(e.data() as Map<String, dynamic>);
+          for (var element in product.category) {
+            if (element.name == category) {
+              return product;
+            }
+          }
+        }).toList());
+    print(productData.runtimeType);
+    return productData;
+  }
+
+  //get Categorized product data
+  Stream<List<ProductModel>> getDiscountedProductData() {
+    final productData = _products
+        .where("discount", isNull: false)
+        .snapshots()
+        .map((snap) => snap.docs.map((e) {
+              return ProductModel.fromMap(e.data() as Map<String, dynamic>);
+            }).toList());
+
+    return productData;
   }
 }

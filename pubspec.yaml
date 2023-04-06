@@ -54,6 +54,7 @@ dependencies:
   flutter_login_facebook: ^1.7.0
   
   linkedin_login: ^2.2.1
+  intl: ^0.17.0
   
 
 

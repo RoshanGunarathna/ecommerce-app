@@ -1,7 +1,7 @@
-import 'dart:io';
-
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../model/category_model.dart';
 import '../../../model/product.dart';
 
 import '../repository/category_repository.dart';
@@ -30,10 +30,16 @@ class CategoryController extends StateNotifier<bool> {
   }
 
   //get categorized product data
-  Stream<List<ProductModel>> getCategorizedProductData({
+  Stream<List<ProductModel?>> getCategorizedProductData({
     required String category,
   }) {
     return _categoryRepository.getCategorizedProductData(
         category: category, ref: _ref);
+  }
+
+  //get category list
+  Future<bool> getCategoryData(BuildContext context) async {
+    return await _categoryRepository.getCategoryData(
+        ref: _ref, context: context);
   }
 }
