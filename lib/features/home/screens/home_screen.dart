@@ -62,7 +62,6 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("pageList: ${_pageList.length}");
     final userData = ref.watch(userProvider);
     final UserModel user = userData ??
         UserModel(

@@ -37,7 +37,7 @@ class CustomGridView extends StatelessWidget {
               ? SizedBox(
                   height: 460,
                   child: GridView.builder(
-                    scrollDirection: Axis.horizontal,
+                    scrollDirection: Axis.vertical,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                             mainAxisExtent: 220,

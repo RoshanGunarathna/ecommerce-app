@@ -34,16 +34,21 @@ class CommonProductStreamRepository {
 
   //get Categorized product data
   Stream<List<ProductModel?>> getCategorizedProductData(String category) {
-    final productData = _products.snapshots().map((snap) => snap.docs.map((e) {
-          final product =
-              ProductModel.fromMap(e.data() as Map<String, dynamic>);
-          for (var element in product.category) {
-            if (element.name == category) {
-              return product;
-            }
+    final productData = _products.snapshots().map((snap) {
+      final productList = snap.docs.map((e) {
+        final value = e.data() as Map<String, dynamic>;
+
+        final product = ProductModel.fromMap(value);
+        for (var element in product.category) {
+          if (element.name == category) {
+            return product;
           }
-        }).toList());
-    print(productData.runtimeType);
+        }
+      }).toList();
+      productList.removeWhere((element) => element == null);
+      return productList;
+    });
+
     return productData;
   }
 

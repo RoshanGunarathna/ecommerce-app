@@ -5,34 +5,31 @@ import '../../../model/product.dart';
 import 'product_card.dart';
 
 class CustomGridView extends StatelessWidget {
-  final String? categoryName;
+  final String categoryName;
   final List<ProductModel?> productList;
   const CustomGridView({
     Key? key,
-    this.categoryName,
+    required this.categoryName,
     required this.productList,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final isProductNull = productList[0] == null;
+    final isProductNull = productList.isEmpty;
     return SingleChildScrollView(
       child: Column(
         children: [
-          (categoryName != null && isProductNull == false)
-              ? Container(
-                  alignment: Alignment.topLeft,
-                  padding: const EdgeInsets.only(
-                    top: 10,
-                    bottom: 12,
-                  ),
-                  child: Text(
-                    categoryName!,
-                    style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                )
-              : const SizedBox(),
+          Container(
+            alignment: Alignment.topLeft,
+            padding: const EdgeInsets.only(
+              top: 10,
+              bottom: 12,
+            ),
+            child: Text(
+              categoryName!,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+          ),
           isProductNull == false
               ? SizedBox(
                   height: 460,

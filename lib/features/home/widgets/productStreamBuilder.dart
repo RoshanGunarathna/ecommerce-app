@@ -17,14 +17,16 @@ class ProductStramBuilder extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.all(17.0),
-      child: StreamBuilder(
-          stream: categoryName != null
+      child: FutureBuilder(
+          future: categoryName != null
               ? ref
                   .watch(categoryControllerProvider.notifier)
                   .getCategorizedProductData(category: categoryName!)
+                  .first
               : ref
                   .watch(categoryControllerProvider.notifier)
-                  .getAllProductData(),
+                  .getAllProductData()
+                  .first,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -50,7 +52,8 @@ class ProductStramBuilder extends ConsumerWidget {
               return Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: CustomGridView(
-                    productList: products, categoryName: categoryName),
+                    productList: products,
+                    categoryName: categoryName ?? "Trending"),
               );
             } else {
               return const SizedBox();
