@@ -28,8 +28,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        primaryColor: primaryColor,
-      ),
+          primaryColor: primaryColor,
+          appBarTheme: const AppBarTheme(backgroundColor: primaryColor)),
       debugShowCheckedModeBanner: false,
       home: const SafeArea(
         child: SplashScreen(),

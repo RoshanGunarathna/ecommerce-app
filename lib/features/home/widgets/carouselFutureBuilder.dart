@@ -5,8 +5,8 @@ import '../../../model/product.dart';
 import '../controller/home_controller.dart';
 import 'carouselImage.dart';
 
-class CarouselStramBuilder extends ConsumerWidget {
-  const CarouselStramBuilder({
+class CarouselFutureBuilder extends ConsumerWidget {
+  const CarouselFutureBuilder({
     Key? key,
   }) : super(key: key);
 
@@ -14,8 +14,8 @@ class CarouselStramBuilder extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.all(17.0),
-      child: StreamBuilder(
-          stream: ref
+      child: FutureBuilder(
+          future: ref
               .watch(homeControllerProvider.notifier)
               .getDiscountedProductData(),
           builder: (context, snapshot) {

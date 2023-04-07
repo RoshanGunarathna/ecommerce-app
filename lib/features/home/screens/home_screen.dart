@@ -5,11 +5,12 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/common/controller/common_get_category_controller.dart';
+import '../../../core/common/controller/common_get_product_controller.dart';
 import '../../../model/category_model.dart';
 
 import '../../categories/controller/category_controller.dart';
 
-import '../widgets/carouselStreamBuilder.dart';
+import '../widgets/carouselFutureBuilder.dart';
 import '../widgets/productStreamBuilder.dart';
 import '../widgets/search.dart';
 
@@ -44,7 +45,7 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
       setState(() {
         _pageList.addAll(_categoryList
             .map((e) => ProductStramBuilder(
-                  categoryName: e.name,
+                  category: e.name,
                 ))
             .toList());
       });
@@ -86,7 +87,7 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
           padding: const EdgeInsets.all(15.0),
           child: Column(
             children: [
-              const CarouselStramBuilder(),
+              const CarouselFutureBuilder(),
               const SizedBox(
                 height: 10,
               ),

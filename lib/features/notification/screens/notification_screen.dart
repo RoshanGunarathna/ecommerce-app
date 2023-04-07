@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/common/controller/common_get_product_controller.dart';
 import '../../../core/palette.dart';
 import '../../home/widgets/bottom_bar.dart';
 
-class NotificationScreen extends StatefulWidget {
+class NotificationScreen extends ConsumerStatefulWidget {
   const NotificationScreen({super.key});
 
   @override
-  State<NotificationScreen> createState() => _NotificationScreenState();
+  ConsumerState<NotificationScreen> createState() =>
+      _NotificationScreenConsumerState();
 }
 
-class _NotificationScreenState extends State<NotificationScreen> {
+class _NotificationScreenConsumerState
+    extends ConsumerState<NotificationScreen> {
   final List<String> images = [];
 
   void backtoHome() {

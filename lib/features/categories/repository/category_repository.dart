@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/common/controller/common_get_category_controller.dart';
-import '../../../core/common/repository/common_product_stream_repository.dart';
+import '../../../core/common/controller/common_get_product_controller.dart';
 
 import '../../../model/product.dart';
 
@@ -10,18 +10,18 @@ final categoryRepositoryProvider = Provider((ref) => CategoryRepository());
 
 class CategoryRepository {
 //get all product data
-  Stream<List<ProductModel>> getAllProductData(Ref ref) {
-    return ref.watch(commonProductStreamRepositoryProvider).getAllProductData();
+  Future<List<ProductModel>> getAllProductData(Ref ref) {
+    return ref
+        .read(commonGetProductControllerProvider.notifier)
+        .getAllProductData();
   }
 
   //get categorized product data
-  Stream<List<ProductModel?>> getCategorizedProductData({
+  AsyncValue<List<ProductModel?>> getCategorizedProductData({
     required Ref ref,
     required String category,
   }) {
-    return ref
-        .watch(commonProductStreamRepositoryProvider)
-        .getCategorizedProductData(category);
+    return ref.read(categorizedProductListProvider(category));
   }
 
   //get category list

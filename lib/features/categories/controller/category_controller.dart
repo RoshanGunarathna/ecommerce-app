@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../model/category_model.dart';
 import '../../../model/product.dart';
 
 import '../repository/category_repository.dart';
@@ -25,12 +24,12 @@ class CategoryController extends StateNotifier<bool> {
         super(false);
 
 //get all product data
-  Stream<List<ProductModel>> getAllProductData() {
+  Future<List<ProductModel>> getAllProductData() {
     return _categoryRepository.getAllProductData(_ref);
   }
 
   //get categorized product data
-  Stream<List<ProductModel?>> getCategorizedProductData({
+  AsyncValue<List<ProductModel?>> getCategorizedProductData({
     required String category,
   }) {
     return _categoryRepository.getCategorizedProductData(

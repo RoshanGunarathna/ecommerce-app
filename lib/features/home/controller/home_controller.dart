@@ -21,12 +21,12 @@ class HomeController extends StateNotifier<bool> {
         super(false);
 
 //get all product data
-  Stream<List<ProductModel>> getAllProductData() {
+  Future<List<ProductModel>> getAllProductData() {
     return _homeRepository.getAllProductData(_ref);
   }
 
   //get categorized product data
-  Stream<List<ProductModel?>> getCategorizedProductData({
+  AsyncValue<List<ProductModel?>> getCategorizedProductData({
     required String category,
   }) {
     return _homeRepository.getCategorizedProductData(
@@ -34,12 +34,13 @@ class HomeController extends StateNotifier<bool> {
   }
 
   //get discounted product data
-  Stream<List<ProductModel>> getDiscountedProductData() {
+  Future<List<ProductModel>> getDiscountedProductData() {
     return _homeRepository.getDiscountedProductData(ref: _ref);
   }
 
   //get Category list
   Future<bool> getCategoryData(BuildContext context) async {
+    print("HomeController");
     return await _homeRepository.getCategoryData(ref: _ref, context: context);
   }
 }
