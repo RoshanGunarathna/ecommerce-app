@@ -31,7 +31,7 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
   List<CategoryModel> _categoryList = [];
 
   final List<Widget> _pageList = [
-    const ProductStramBuilder(),
+    ProductStramBuilder(),
   ];
 
   void refreshCategoryList() async {
@@ -42,14 +42,17 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
     if (isOver) {
       _categoryList = await ref.read(categoryProvider)!;
 
-      setState(() {
-        _pageList.addAll(_categoryList
-            .map((e) => ProductStramBuilder(
-                  category: e.name,
-                ))
-            .toList());
-      });
+      _pageList.addAll(_categoryList
+          .map((e) => ProductStramBuilder(
+                category: e.name,
+              ))
+          .toList());
     }
+    refresh();
+  }
+
+  void refresh() {
+    setState(() {});
   }
 
   @override

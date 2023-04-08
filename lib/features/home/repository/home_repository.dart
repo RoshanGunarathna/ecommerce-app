@@ -21,7 +21,7 @@ class HomeRepository {
     required Ref ref,
     required String category,
   }) {
-    return ref.read(categorizedProductListProvider(category));
+    return ref.watch(categorizedProductListProvider(category));
   }
 
   //get Discounted product data
