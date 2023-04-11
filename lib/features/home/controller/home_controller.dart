@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../model/product.dart';
 import '../repository/home_repository.dart';
 
-//authControllerProvider
+//homeControllerProvider
 final homeControllerProvider = StateNotifierProvider<HomeController, bool>(
   (ref) => HomeController(
     homeRepository: ref.watch(homeRepositoryProvider),

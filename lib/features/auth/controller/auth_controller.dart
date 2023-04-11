@@ -47,10 +47,12 @@ class AuthController extends StateNotifier<bool> {
 //google sign-in
   void signInWithGoogle(BuildContext context) async {
     state = true;
-    final user = await _authRepository.signinWithGoogle();
+    final user = await _authRepository.signinWithGoogle(context);
     state = false;
-    user.fold((l) => showSnackBar(context: context, text: l.message),
-        (userModel) {
+    user.fold((l) {
+      showSnackBar(context: context, text: l.message);
+      print(l.message);
+    }, (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
       Navigator.pushNamedAndRemoveUntil(
           context, BottomBar.routeName, (route) => false);
@@ -60,10 +62,11 @@ class AuthController extends StateNotifier<bool> {
 //facebook sign-in
   void signInWithFacebook(BuildContext context) async {
     state = true;
-    final user = await _authRepository.signInWithFacebook();
+    final user = await _authRepository.signInWithFacebook(context);
     state = false;
-    user.fold((l) => showSnackBar(context: context, text: l.message),
-        (userModel) {
+    user.fold((l) {
+      showSnackBar(context: context, text: l.message);
+    }, (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
       Navigator.pushNamedAndRemoveUntil(
           context, BottomBar.routeName, (route) => false);
@@ -97,7 +100,7 @@ class AuthController extends StateNotifier<bool> {
       required String name}) async {
     state = true;
     final user = await _authRepository.signUpWithEmail(
-        email: email, password: password, name: name);
+        context: context, email: email, password: password, name: name);
     state = false;
     user.fold((l) {
       print(l.message);

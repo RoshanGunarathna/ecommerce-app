@@ -238,6 +238,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.7.0"
+  flutter_rating:
+    dependency: "direct main"
+    description:
+      name: flutter_rating
+      sha256: "407f3a581adf90e124d44f568d9c6094e8757e075622d2fbd48498578f24fcca"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
+  flutter_rating_bar:
+    dependency: "direct main"
+    description:
+      name: flutter_rating_bar
+      sha256: d2af03469eac832c591a1eba47c91ecc871fe5708e69967073c043b2d775ed93
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.1"
   flutter_riverpod:
     dependency: "direct main"
     description:

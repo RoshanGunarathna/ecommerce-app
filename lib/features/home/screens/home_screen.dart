@@ -5,14 +5,13 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/common/controller/common_get_category_controller.dart';
-import '../../../core/common/controller/common_get_product_controller.dart';
+
+import '../../../core/common/widgets/search.dart';
 import '../../../model/category_model.dart';
 
-import '../../categories/controller/category_controller.dart';
-
+import '../controller/home_controller.dart';
 import '../widgets/carouselFutureBuilder.dart';
 import '../widgets/productStreamBuilder.dart';
-import '../widgets/search.dart';
 
 final currentTimeProvider = StreamProvider.autoDispose<DateTime>((ref) {
   return Stream.periodic(const Duration(seconds: 1), (_) => DateTime.now());
@@ -27,16 +26,18 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
+  final _searchController = TextEditingController();
+
   //for category part
   List<CategoryModel> _categoryList = [];
 
   final List<Widget> _pageList = [
-    ProductStramBuilder(),
+    const ProductStramBuilder(),
   ];
 
   void refreshCategoryList() async {
     final isOver = await ref
-        .read(categoryControllerProvider.notifier)
+        .read(homeControllerProvider.notifier)
         .getCategoryData(context);
 
     if (isOver) {
@@ -65,6 +66,12 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _searchController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final userData = ref.watch(userProvider);
     final UserModel user = userData ??
@@ -80,9 +87,9 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         elevation: 0,
-        title: const Padding(
-          padding: EdgeInsets.only(top: 8.0),
-          child: Search(),
+        title: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Search(textEditingController: _searchController),
         ),
       ),
       body: SingleChildScrollView(

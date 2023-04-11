@@ -1,3 +1,5 @@
+import 'package:ecommerce_app/features/search/controller/search_controller.dart';
+import 'package:ecommerce_app/features/search/screens/search_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'core/common/error_text.dart';
@@ -16,6 +18,12 @@ Route<dynamic> generateRoute(RouteSettings routeSettings) {
       return MaterialPageRoute(
         settings: routeSettings,
         builder: (context) => const BottomBar(),
+      );
+    case SearchScreen.routeName:
+      final searchController = routeSettings.arguments as TextEditingController;
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (context) => SearchScreen(searchController: searchController),
       );
     default:
       return MaterialPageRoute(

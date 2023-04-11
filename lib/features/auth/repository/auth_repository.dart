@@ -15,6 +15,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:linkedin_login/linkedin_login.dart';
 
+import '../../../core/common/controller/common_get_date_and_time_controller.dart';
 import '../../../core/constants/constants.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../core/constants/keys.dart';
@@ -29,6 +30,7 @@ final authRepositoryProvider = Provider(
     auth: ref.watch(authProvider),
     googleSignIn: ref.watch(googleSigninProvider),
     facebookAuth: ref.watch(facebookSigninProvider),
+    ref: ref,
   ),
 );
 
@@ -37,16 +39,19 @@ class AuthRepository {
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
   final FacebookLogin _facebookAuth;
+  final Ref _ref;
 
   AuthRepository({
     required FirebaseFirestore firestore,
     required FirebaseAuth auth,
     required GoogleSignIn googleSignIn,
     required FacebookLogin facebookAuth,
+    required Ref ref,
   })  : _auth = auth,
         _firestore = firestore,
         _googleSignIn = googleSignIn,
-        _facebookAuth = facebookAuth;
+        _facebookAuth = facebookAuth,
+        _ref = ref;
 
   CollectionReference get _users =>
       _firestore.collection(FirebaseConstants.userCollection);
@@ -54,7 +59,7 @@ class AuthRepository {
   Stream<User?> get authStateChange => _auth.authStateChanges();
 
 //Google sign-in
-  FutureEither<UserModel?> signinWithGoogle() async {
+  FutureEither<UserModel?> signinWithGoogle(BuildContext context) async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
@@ -74,6 +79,11 @@ class AuthRepository {
           final uid = userCredential.user!.uid;
 
           if (userCredential.additionalUserInfo!.isNewUser) {
+            //get the time&date in sri lanka
+            String? dateAndTime = await _ref
+                .read(commonGetDateAndTimeControllerProvider.notifier)
+                .getDateAndTime(context);
+
             UserModel userModel = UserModel(
               email: userCredential.user!.email ?? '',
               photoUrl:
@@ -82,8 +92,23 @@ class AuthRepository {
               cart: [],
               id: uid,
               name: userCredential.user!.displayName ?? '',
+              dateTime: dateAndTime != null
+                  ? DateTime.parse(dateAndTime)
+                  : DateTime.now(),
             );
-            await _users.doc(uid).set(UserModel.toMap(userModel: userModel));
+
+            //Generate search Keywords
+            final List<String> searchKeyword = [];
+            final splittedMultipleWords = userModel.name.trim().split(" ");
+            for (var element in splittedMultipleWords) {
+              final String wordToLowercase = element.toLowerCase();
+              for (var i = 1; i < wordToLowercase.length + 1; i++) {
+                searchKeyword.add(wordToLowercase.substring(0, i));
+              }
+            }
+
+            await _users.doc(uid).set(UserModel.toMap(
+                userModel: userModel, searchKeyword: searchKeyword));
 
             //get current user data and return userData to controller
             final user = await getUserData(
@@ -110,7 +135,7 @@ class AuthRepository {
   }
 
   //Facebook sign-in
-  FutureEither<UserModel?> signInWithFacebook() async {
+  FutureEither<UserModel?> signInWithFacebook(BuildContext context) async {
     try {
       final FacebookLoginResult loginResult =
           await _facebookAuth.logIn(permissions: [
@@ -129,6 +154,11 @@ class AuthRepository {
           //get user id
           final uid = userCredential.user!.uid;
           if (userCredential.additionalUserInfo!.isNewUser) {
+            //get the time&date in sri lanka
+            String? dateAndTime = await _ref
+                .read(commonGetDateAndTimeControllerProvider.notifier)
+                .getDateAndTime(context);
+
             UserModel userModel = UserModel(
               email: userCredential.user!.email ?? '',
               photoUrl:
@@ -137,9 +167,24 @@ class AuthRepository {
               cart: [],
               id: userCredential.user!.uid,
               name: userCredential.user!.displayName ?? '',
+              dateTime: dateAndTime != null
+                  ? DateTime.parse(dateAndTime)
+                  : DateTime.now(),
             );
+
+            //Generate search Keywords
+            final List<String> searchKeyword = [];
+            final splittedMultipleWords = userModel.name.trim().split(" ");
+            for (var element in splittedMultipleWords) {
+              final String wordToLowercase = element.toLowerCase();
+              for (var i = 1; i < wordToLowercase.length + 1; i++) {
+                searchKeyword.add(wordToLowercase.substring(0, i));
+              }
+            }
+
             await _users.doc(userCredential.user!.uid).set(
-                  UserModel.toMap(userModel: userModel),
+                  UserModel.toMap(
+                      userModel: userModel, searchKeyword: searchKeyword),
                 );
 
             //get current user data and return userData to controller
@@ -182,22 +227,44 @@ class AuthRepository {
           //get user id
           final uid = userCredential.user!.uid;
 
+          //get the time&date in sri lanka
+          String? dateAndTime = await _ref
+              .read(commonGetDateAndTimeControllerProvider.notifier)
+              .getDateAndTime(context);
+
+          //Generate search Keywords
+          final List<String> searchKeyword = [];
+          final splittedMultipleWords =
+              "${linkedInUser.user.firstName!.localized!.label} ${linkedInUser.user.lastName!.localized!.label}"
+                  .trim()
+                  .split(" ");
+          for (var element in splittedMultipleWords) {
+            final String wordToLowercase = element.toLowerCase();
+            for (var i = 1; i < wordToLowercase.length + 1; i++) {
+              searchKeyword.add(wordToLowercase.substring(0, i));
+            }
+          }
+
           //create a map for send to the firebase
           Map<String, dynamic> userMap = UserModel.toMap(
+              searchKeyword: searchKeyword,
               userModel: UserModel(
-            email:
-                linkedInUser.user.email!.elements![0].handleDeep!.emailAddress!,
-            photoUrl: linkedInUser.user.profilePicture != null
-                ? linkedInUser.user.profilePicture!.displayImageContent!
-                    .elements![0].identifiers![0].identifier
-                    .toString()
-                : Constants.avatarDefault,
-            address: '',
-            cart: [],
-            id: uid,
-            name:
-                "${linkedInUser.user.firstName!.localized!.label} ${linkedInUser.user.lastName!.localized!.label}",
-          ));
+                email: linkedInUser
+                    .user.email!.elements![0].handleDeep!.emailAddress!,
+                photoUrl: linkedInUser.user.profilePicture != null
+                    ? linkedInUser.user.profilePicture!.displayImageContent!
+                        .elements![0].identifiers![0].identifier
+                        .toString()
+                    : Constants.avatarDefault,
+                address: '',
+                cart: [],
+                id: uid,
+                name:
+                    "${linkedInUser.user.firstName!.localized!.label} ${linkedInUser.user.lastName!.localized!.label}",
+                dateTime: dateAndTime != null
+                    ? DateTime.parse(dateAndTime)
+                    : DateTime.now(),
+              ));
 
           //save data in firebase
           await _users.doc(uid).set(userMap);
@@ -223,8 +290,10 @@ class AuthRepository {
   //Email sign-Up
   FutureEither<UserModel?> signUpWithEmail(
       {required String email,
+      required BuildContext context,
       required String password,
       required String name}) async {
+    print(email);
     try {
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
@@ -236,8 +305,24 @@ class AuthRepository {
         //get user id
         final uid = userCredential.user!.uid;
 
+        // get the time&date in sri lanka
+        String? dateAndTime = await _ref
+            .read(commonGetDateAndTimeControllerProvider.notifier)
+            .getDateAndTime(context);
+
+        //Generate search Keywords
+        final List<String> searchKeyword = [];
+        final splittedMultipleWords = name.trim().split(" ");
+        for (var element in splittedMultipleWords) {
+          final String wordToLowercase = element.toLowerCase();
+          for (var i = 1; i < wordToLowercase.length + 1; i++) {
+            searchKeyword.add(wordToLowercase.substring(0, i));
+          }
+        }
+
         //create a map for send to the firebase
         Map<String, dynamic> userMap = UserModel.toMap(
+          searchKeyword: searchKeyword,
           userModel: UserModel(
             id: uid,
             name: name,
@@ -245,6 +330,9 @@ class AuthRepository {
             email: email,
             photoUrl: "",
             cart: [],
+            dateTime: dateAndTime != null
+                ? DateTime.parse(dateAndTime)
+                : DateTime.now(),
           ),
         );
 

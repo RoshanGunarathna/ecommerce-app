@@ -9,6 +9,7 @@ class UserModel {
   final String email;
   final String photoUrl;
   final List<dynamic> cart;
+  final DateTime? dateTime;
   UserModel({
     required this.id,
     required this.name,
@@ -16,30 +17,34 @@ class UserModel {
     required this.email,
     required this.photoUrl,
     required this.cart,
+    this.dateTime,
   });
 
   UserModel copyWith({
     String? id,
     String? name,
-    String? password,
     String? address,
     String? email,
     String? photoUrl,
     List<dynamic>? cart,
+    DateTime? dateTime,
   }) {
     return UserModel(
-      email: email ?? this.email,
-      name: name ?? this.name,
       id: id ?? this.id,
-      photoUrl: photoUrl ?? this.photoUrl,
+      name: name ?? this.name,
       address: address ?? this.address,
+      email: email ?? this.email,
+      photoUrl: photoUrl ?? this.photoUrl,
       cart: cart ?? this.cart,
+      dateTime: dateTime ?? this.dateTime,
     );
   }
 
   static Map<String, dynamic> toMap({
     required UserModel userModel,
+    required List<String> searchKeyword,
   }) {
+    print(searchKeyword);
     return <String, dynamic>{
       'email': userModel.email,
       'name': userModel.name,
@@ -47,18 +52,21 @@ class UserModel {
       'photoUrl': userModel.photoUrl,
       'address': userModel.address,
       'cart': userModel.cart,
+      'searchKeyword': searchKeyword,
+      'dateTime': userModel.dateTime.toString(),
     };
   }
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      email: map['email'] ?? '',
-      name: map['name'] ?? '',
-      id: map['id'] ?? '',
-      photoUrl: map['photoUrl'] ?? '',
-      address: map['address'] ?? '',
-      cart: map['cart'] ?? [],
-    );
+        email: map['email'] ?? '',
+        name: map['name'] ?? '',
+        id: map['id'] ?? '',
+        photoUrl: map['photoUrl'] ?? '',
+        address: map['address'] ?? '',
+        cart: map['cart'] ?? [],
+        dateTime:
+            map['dateTime'] != null ? DateTime.parse(map['dateTime']) : null);
   }
 
   // @override

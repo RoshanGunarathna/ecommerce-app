@@ -15,6 +15,7 @@ class ProductModel {
   final List<Rating>? rating;
   final double? kg;
   final int? discount;
+  final DateTime? dateTime;
   ProductModel({
     required this.id,
     required this.name,
@@ -27,45 +28,28 @@ class ProductModel {
     required this.kg,
     this.rating,
     this.discount,
+    this.dateTime,
   });
-
-  static Map<String, dynamic> toMap(ProductModel productModel) {
-    return <String, dynamic>{
-      'id': productModel.id,
-      'name': productModel.name,
-      'description': productModel.description,
-      'category': productModel.category.map(
-        (category) => CategoryModel.toMap(category),
-      ),
-      'sellerUserId': productModel.sellerUserId,
-      'images': productModel.images,
-      'price': productModel.price,
-      'quantity': productModel.quantity,
-      'rating': productModel.rating != null
-          ? productModel.rating!.map((ratingModel) => Rating.toMap(ratingModel))
-          : null,
-      'kg': productModel.kg,
-      'discount': productModel.discount,
-    };
-  }
 
   factory ProductModel.fromMap(Map<String, dynamic> map) {
     final productModel = ProductModel(
-      id: map['id'] as String,
-      name: map['name'] as String,
-      description: map['description'] as String,
-      category: List<CategoryModel>.from(
-          map['category']?.map((res) => CategoryModel.fromMap(res))),
-      sellerUserId: map['sellerUserId'] as String,
-      images: List<String>.from(map['images']),
-      price: map['price'] as double,
-      quantity: map['quantity'] as int,
-      kg: map['kg'] != null ? map['kg'] as double : null,
-      rating: map['rating'] != null
-          ? List<Rating>.from(map['rating']?.map((res) => Rating.fromMap(res)))
-          : null,
-      discount: map['discount'] != null ? map['discount'] as int : null,
-    );
+        id: map['id'] as String,
+        name: map['name'] as String,
+        description: map['description'] as String,
+        category: List<CategoryModel>.from(
+            map['category']?.map((res) => CategoryModel.fromMap(res))),
+        sellerUserId: map['sellerUserId'] as String,
+        images: List<String>.from(map['images']),
+        price: map['price'] as double,
+        quantity: map['quantity'] as int,
+        kg: map['kg'] != null ? map['kg'] as double : null,
+        rating: map['rating'] != null
+            ? List<Rating>.from(
+                map['rating']?.map((res) => Rating.fromMap(res)))
+            : null,
+        discount: map['discount'] != null ? map['discount'] as int : null,
+        dateTime:
+            map['dateTime'] != null ? DateTime.parse(map['dateTime']) : null);
 
     return productModel;
   }

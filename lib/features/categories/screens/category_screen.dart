@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scroll_navigation/scroll_navigation.dart';
 
 import '../../../core/common/controller/common_get_category_controller.dart';
+import '../../../core/common/widgets/search.dart';
 import '../../../core/palette.dart';
 import '../../../model/category_model.dart';
 import '../../home/widgets/bottom_bar.dart';
 
 import '../controller/category_controller.dart';
 import '../widgets/productStreamBuilder.dart';
-import '../widgets/search.dart';
 
 class CategoryScreen extends ConsumerStatefulWidget {
   const CategoryScreen({super.key});
@@ -20,6 +20,8 @@ class CategoryScreen extends ConsumerStatefulWidget {
 }
 
 class _CategoryScreenConsumerState extends ConsumerState<CategoryScreen> {
+  final _searchController = TextEditingController();
+
   void backtoHome() {
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => const BottomBar()));
@@ -50,6 +52,13 @@ class _CategoryScreenConsumerState extends ConsumerState<CategoryScreen> {
             .toList());
       });
     }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _searchController.dispose();
   }
 
   @override
@@ -84,7 +93,7 @@ class _CategoryScreenConsumerState extends ConsumerState<CategoryScreen> {
               ),
               elevation: 0,
             ),
-            const Search(),
+            Search(textEditingController: _searchController),
           ],
         ),
       ),
