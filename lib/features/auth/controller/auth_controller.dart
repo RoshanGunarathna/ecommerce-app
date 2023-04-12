@@ -51,7 +51,6 @@ class AuthController extends StateNotifier<bool> {
     state = false;
     user.fold((l) {
       showSnackBar(context: context, text: l.message);
-      print(l.message);
     }, (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
       Navigator.pushNamedAndRemoveUntil(
@@ -126,7 +125,6 @@ class AuthController extends StateNotifier<bool> {
     state = false;
     user.fold(
       (l) {
-        print(l.message);
         showSnackBar(context: context, text: l.message);
       },
       (userModel) {

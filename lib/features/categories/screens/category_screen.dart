@@ -93,7 +93,7 @@ class _CategoryScreenConsumerState extends ConsumerState<CategoryScreen> {
               ),
               elevation: 0,
             ),
-            Search(textEditingController: _searchController),
+            Search(searchController: _searchController),
           ],
         ),
       ),

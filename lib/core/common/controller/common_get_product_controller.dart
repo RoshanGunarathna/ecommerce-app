@@ -48,7 +48,6 @@ class CommonGetProductController extends StateNotifier<bool> {
   Future<List<ProductModel?>> getCategorizedProductData({
     required String category,
   }) async {
-    print("categorzed");
     final productList =
         await _commonGetProductRepository.getCategorizedProductData(category);
 

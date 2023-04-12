@@ -57,6 +57,9 @@ dependencies:
   intl: ^0.17.0
   flutter_rating: ^0.0.2
   flutter_rating_bar: ^4.0.1
+  speech_to_text: ^6.1.1
+  avatar_glow: ^2.0.2
+  just_audio: ^0.9.32
   
 
 
@@ -89,6 +92,7 @@ flutter:
   assets:
     - assets/logos/
     - assets/images/
+ 
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

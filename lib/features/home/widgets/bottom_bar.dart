@@ -40,6 +40,8 @@ class _BottomBarState extends State<BottomBar> {
       child: Scaffold(
         body: pages[_page],
         bottomNavigationBar: BottomNavigationBar(
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
           type: BottomNavigationBarType.fixed,
           currentIndex: _page,
           iconSize: 28,

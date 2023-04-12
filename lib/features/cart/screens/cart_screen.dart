@@ -45,7 +45,7 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     var fontSize = const TextStyle(fontSize: 15);
-    print(images.length);
+
     var size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(

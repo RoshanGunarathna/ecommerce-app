@@ -26,7 +26,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
-  final _searchController = TextEditingController();
+  late TextEditingController _searchController;
 
   //for category part
   List<CategoryModel> _categoryList = [];
@@ -58,6 +58,7 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
 
   @override
   void initState() {
+    _searchController = TextEditingController();
     SchedulerBinding.instance.addPostFrameCallback((_) {
       refreshCategoryList();
     });
@@ -89,7 +90,7 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
         elevation: 0,
         title: Padding(
           padding: const EdgeInsets.only(top: 8.0),
-          child: Search(textEditingController: _searchController),
+          child: Search(searchController: _searchController),
         ),
       ),
       body: SingleChildScrollView(

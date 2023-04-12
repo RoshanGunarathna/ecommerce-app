@@ -293,7 +293,6 @@ class AuthRepository {
       required BuildContext context,
       required String password,
       required String name}) async {
-    print(email);
     try {
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
@@ -383,7 +382,9 @@ class AuthRepository {
 
   //get user data
   Stream<UserModel> getUserData({required String uid}) {
-    return _users.doc(uid).snapshots().map(
-        (event) => UserModel.fromMap(event.data() as Map<String, dynamic>));
+    return _users.doc(uid).snapshots().map((event) {
+      print(event.runtimeType);
+      return UserModel.fromMap(event.data() as Map<String, dynamic>);
+    });
   }
 }

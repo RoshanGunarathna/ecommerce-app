@@ -32,7 +32,6 @@ class _SearchScreenConsumerState extends ConsumerState<SearchScreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 

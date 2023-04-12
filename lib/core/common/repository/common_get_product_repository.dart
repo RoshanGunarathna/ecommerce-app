@@ -53,7 +53,7 @@ class CommonGetProductRepository {
           }
         }
       }).toList();
-      print(productList);
+
       productList.removeWhere((element) => element == null);
       return productList;
     } on FirebaseException catch (e) {
