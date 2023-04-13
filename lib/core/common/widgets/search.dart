@@ -22,7 +22,7 @@ class _SearchState extends State<Search> {
   //for voicerecognition
   bool _isVoiceSupport = false;
   bool _isListening = false;
-  String _text = "";
+  String _text = "Hold the button and speak..";
 
   //instants
   SpeechToText _speechToText = SpeechToText();
@@ -115,6 +115,7 @@ class _SearchState extends State<Search> {
                           onTapDown: (details) async {
                             if (!_isListening) {
                               setState(() {
+                                _text = "Hold the button and speak..";
                                 _isListening = true;
                               });
                               var available = await _speechToText.initialize();
@@ -124,9 +125,9 @@ class _SearchState extends State<Search> {
                                     onResult: (result) {
                                       setState(() {
                                         _text = result.recognizedWords;
+                                        widget.searchController.text =
+                                            result.recognizedWords;
                                       });
-                                      widget.searchController.text =
-                                          result.recognizedWords;
                                     },
                                   );
                                 });
@@ -139,9 +140,9 @@ class _SearchState extends State<Search> {
                             setState(() {
                               _isListening = false;
                             });
-                            _text = "";
-                            //send search text to search screen
-                            if (widget.searchController.text.isNotEmpty) {
+
+                            if (_text != "Hold the button and speak..") {
+                              print("This is awesome!!!");
                               navigateToSearchScreen(context);
                             }
                           },
