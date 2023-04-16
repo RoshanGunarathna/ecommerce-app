@@ -8,10 +8,14 @@ class CategoryModel {
     required this.id,
   });
 
-  static Map<String, dynamic> toMap(CategoryModel categoryModel) {
+  static Map<String, dynamic> toMap({
+    required CategoryModel categoryModel,
+    required List<String> searchKeyword,
+  }) {
     return <String, dynamic>{
       'name': categoryModel.name,
       'id': categoryModel.id,
+      'searchKeyword': searchKeyword,
     };
   }
 
@@ -19,6 +23,17 @@ class CategoryModel {
     return CategoryModel(
       name: map['name'] as String,
       id: map['id'] as String,
+    );
+  }
+
+  CategoryModel copyWith({
+    String? name,
+    String? id,
+    DateTime? dateTime,
+  }) {
+    return CategoryModel(
+      name: name ?? this.name,
+      id: id ?? this.id,
     );
   }
 }

@@ -38,7 +38,6 @@ class _SearchState extends State<Search> {
       }
     } catch (e) {
       //
-      print(e.toString());
     }
   }
 
@@ -142,7 +141,6 @@ class _SearchState extends State<Search> {
                             });
 
                             if (_text != "Hold the button and speak..") {
-                              print("This is awesome!!!");
                               navigateToSearchScreen(context);
                             }
                           },

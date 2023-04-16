@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:convert';
+
+import 'package:ecommerce_app/model/product.dart';
 
 class UserModel {
   final String id;
@@ -10,6 +11,7 @@ class UserModel {
   final String photoUrl;
   final List<dynamic> cart;
   final DateTime? dateTime;
+  final List<ProductModel>? favorite;
   UserModel({
     required this.id,
     required this.name,
@@ -18,6 +20,7 @@ class UserModel {
     required this.photoUrl,
     required this.cart,
     this.dateTime,
+    this.favorite,
   });
 
   UserModel copyWith({
@@ -28,6 +31,7 @@ class UserModel {
     String? photoUrl,
     List<dynamic>? cart,
     DateTime? dateTime,
+    List<ProductModel>? favorite,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -37,6 +41,7 @@ class UserModel {
       photoUrl: photoUrl ?? this.photoUrl,
       cart: cart ?? this.cart,
       dateTime: dateTime ?? this.dateTime,
+      favorite: favorite ?? this.favorite,
     );
   }
 
@@ -44,7 +49,6 @@ class UserModel {
     required UserModel userModel,
     required List<String> searchKeyword,
   }) {
-    print(searchKeyword);
     return <String, dynamic>{
       'email': userModel.email,
       'name': userModel.name,
@@ -54,19 +58,43 @@ class UserModel {
       'cart': userModel.cart,
       'searchKeyword': searchKeyword,
       'dateTime': userModel.dateTime.toString(),
+      'favorite': userModel.favorite != null
+          ? userModel.favorite!.map((product) {
+              //Generate search Keywords
+              final List<String> searchKeyword = [];
+              final splittedMultipleWords = product.name.trim().split(" ");
+              for (var element in splittedMultipleWords) {
+                final String wordToLowercase = element.toLowerCase();
+                for (var i = 1; i < wordToLowercase.length + 1; i++) {
+                  searchKeyword.add(wordToLowercase.substring(0, i));
+                }
+              }
+
+              return ProductModel.toMap(
+                  productModel: product, searchKeyword: searchKeyword);
+            }).toList()
+          : null,
     };
   }
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-        email: map['email'] ?? '',
-        name: map['name'] ?? '',
-        id: map['id'] ?? '',
-        photoUrl: map['photoUrl'] ?? '',
-        address: map['address'] ?? '',
-        cart: map['cart'] ?? [],
-        dateTime:
-            map['dateTime'] != null ? DateTime.parse(map['dateTime']) : null);
+      email: map['email'] ?? '',
+      name: map['name'] ?? '',
+      id: map['id'] ?? '',
+      photoUrl: map['photoUrl'] ?? '',
+      address: map['address'] ?? '',
+      cart: map['cart'] ?? [],
+      dateTime:
+          map['dateTime'] != null ? DateTime.parse(map['dateTime']) : null,
+      favorite: map['favorite'] != null && map['favorite'].isNotEmpty
+          ? List<ProductModel>.from(map['favorite']?.map((res) {
+              final product = ProductModel.fromMap(res);
+
+              return product;
+            }))
+          : null,
+    );
   }
 
   // @override

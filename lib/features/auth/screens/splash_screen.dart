@@ -1,4 +1,5 @@
 import 'package:ecommerce_app/features/auth/controller/auth_controller.dart';
+import 'package:ecommerce_app/features/favorite/controller/favorite_controller.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,15 @@ class _SplashScreenConsumerState extends ConsumerState<SplashScreen> {
         .watch(authControllerProvider.notifier)
         .getUserData(data.uid)
         .first;
+
+    //update user
     ref.read(userProvider.notifier).update((state) => userModel);
+
+    //update Favorite Product List
+    //ignore: use_build_context_synchronously
+    ref
+        .read(favoriteControllerProvider.notifier)
+        .updateFavoriteList(context: context);
     setState(() {});
   }
 

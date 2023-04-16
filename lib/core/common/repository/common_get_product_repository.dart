@@ -40,7 +40,6 @@ class CommonGetProductRepository {
 
   //get Categorized product data
   Future<List<ProductModel?>> getCategorizedProductData(String category) async {
-    print(" CommonGetCategorizedProductData is initialized");
     try {
       final res = await _products.get();
       final productList = res.docs.map((e) {

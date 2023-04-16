@@ -22,7 +22,6 @@ class UserServices {
 
       return Future.error(res.statusCode);
     } catch (e) {
-      print(e.toString());
       return Future.error(e.toString());
     }
   }

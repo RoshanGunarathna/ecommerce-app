@@ -40,7 +40,6 @@ class HomeController extends StateNotifier<bool> {
 
   //get Category list
   Future<bool> getCategoryData(BuildContext context) async {
-    print("HomeController");
     return await _homeRepository.getCategoryData(ref: _ref, context: context);
   }
 }

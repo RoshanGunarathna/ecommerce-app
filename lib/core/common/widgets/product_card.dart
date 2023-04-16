@@ -1,16 +1,58 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:ecommerce_app/model/product.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:ecommerce_app/model/product.dart';
 
 import '../../../core/palette.dart';
+import '../../../features/favorite/controller/favorite_controller.dart';
 
-class ProductCard extends StatelessWidget {
+class ProductCard extends ConsumerStatefulWidget {
   final ProductModel product;
+  final Function? onTapFavoriteButton;
 
   const ProductCard({
     Key? key,
     required this.product,
+    this.onTapFavoriteButton,
   }) : super(key: key);
+
+  @override
+  ConsumerState<ProductCard> createState() => _ProductCardConsumerState();
+}
+
+class _ProductCardConsumerState extends ConsumerState<ProductCard> {
+  bool isThisFavorite = false;
+
+  void addToFavoriteList() async {
+    final isAdded = await ref
+        .read(favoriteControllerProvider.notifier)
+        .setFavoriteProductData(product: widget.product, context: context);
+    if (isAdded) {
+      isThisFavorite = true;
+    }
+  }
+
+  Future<bool> removeAProductFromAFavoriteList() async {
+    final isDeleted = await ref
+        .read(favoriteControllerProvider.notifier)
+        .removeAProductFromTheFavoriteList(
+            productID: widget.product.id, context: context);
+    return isDeleted;
+  }
+
+  void favoriteButtonPress() async {
+    if (isThisFavorite == false) {
+      isThisFavorite = true;
+      addToFavoriteList();
+    } else {
+      isThisFavorite = false;
+      final isDeleted = await removeAProductFromAFavoriteList();
+      if (isDeleted) {
+        widget.onTapFavoriteButton!();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +73,7 @@ class ProductCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                   child: Image.network(
-                    product.images[0],
+                    widget.product.images[0],
                     fit: BoxFit.fitHeight,
                   ),
                 ),
@@ -50,11 +92,8 @@ class ProductCard extends StatelessWidget {
                           alignment: Alignment.center,
                           padding: const EdgeInsets.all(0),
                           color: primaryColor,
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.favorite_outline_rounded,
-                            color: primaryColor,
-                          ),
+                          onPressed: favoriteButtonPress,
+                          icon: getIcon(),
                         ),
                       ),
                     ],
@@ -75,7 +114,7 @@ class ProductCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        product.name,
+                        widget.product.name,
                         style: const TextStyle(
                             color: blackColorShade1,
                             fontSize: 15,
@@ -86,7 +125,7 @@ class ProductCard extends StatelessWidget {
                       ),
                       RichText(
                         text: TextSpan(
-                            text: '\$${product.price}',
+                            text: '\$${widget.product.price}',
                             style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -125,5 +164,23 @@ class ProductCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Icon getIcon() {
+    final favoriteList = ref.watch(favoriteProvider);
+
+    Icon icon = const Icon(Icons.favorite_outline_rounded);
+
+    if (favoriteList != null) {
+      if (favoriteList.isNotEmpty) {
+        for (var e in favoriteList) {
+          if (e.id == widget.product.id) {
+            icon = const Icon(Icons.favorite_rounded);
+            isThisFavorite = true;
+          }
+        }
+      }
+    }
+    return icon;
   }
 }

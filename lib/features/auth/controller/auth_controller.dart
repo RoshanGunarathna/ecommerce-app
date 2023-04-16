@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkedin_login/linkedin_login.dart';
 
+import '../../favorite/controller/favorite_controller.dart';
 import '../../home/screens/home_screen.dart';
 import '../../home/widgets/bottom_bar.dart';
 import '../repository/auth_repository.dart';
 
-//loading notifier
+//user provider
 final userProvider = StateProvider<UserModel?>((ref) => null);
 
 //authControllerProvider
@@ -53,6 +54,7 @@ class AuthController extends StateNotifier<bool> {
       showSnackBar(context: context, text: l.message);
     }, (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
+      updateFavoriteList(context: context);
       Navigator.pushNamedAndRemoveUntil(
           context, BottomBar.routeName, (route) => false);
     });
@@ -67,6 +69,7 @@ class AuthController extends StateNotifier<bool> {
       showSnackBar(context: context, text: l.message);
     }, (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
+      updateFavoriteList(context: context);
       Navigator.pushNamedAndRemoveUntil(
           context, BottomBar.routeName, (route) => false);
     });
@@ -85,7 +88,7 @@ class AuthController extends StateNotifier<bool> {
     user.fold((l) => showSnackBar(context: context, text: l.message),
         (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
-
+      updateFavoriteList(context: context);
       Navigator.pushNamedAndRemoveUntil(
           context, BottomBar.routeName, (route) => false);
     });
@@ -102,10 +105,10 @@ class AuthController extends StateNotifier<bool> {
         context: context, email: email, password: password, name: name);
     state = false;
     user.fold((l) {
-      print(l.message);
       showSnackBar(context: context, text: l.message);
     }, (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
+      updateFavoriteList(context: context);
       Navigator.pushNamedAndRemoveUntil(
           context, BottomBar.routeName, (route) => false);
     });
@@ -129,6 +132,7 @@ class AuthController extends StateNotifier<bool> {
       },
       (userModel) {
         _ref.read(userProvider.notifier).update((state) => userModel);
+        updateFavoriteList(context: context);
         Navigator.pushNamedAndRemoveUntil(
             context, HomeScreen.routeName, (route) => false);
       },
@@ -143,5 +147,14 @@ class AuthController extends StateNotifier<bool> {
   //linkedIN error handling
   void linkedInErrorHandling({required String error}) {
     print("Linkedin Error: error");
+  }
+
+  void updateFavoriteList({required BuildContext context}) {
+    _ref
+        .read(favoriteControllerProvider.notifier)
+        .getFavoriteProductData(context)
+        .then((favoriteProductList) => _ref
+            .read(favoriteProvider.notifier)
+            .update((state) => favoriteProductList!));
   }
 }

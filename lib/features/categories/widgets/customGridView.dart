@@ -1,8 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 
+import '../../../core/common/widgets/product_card.dart';
 import '../../../model/product.dart';
-import 'product_card.dart';
 
 class CustomGridView extends StatelessWidget {
   final String? categoryName;

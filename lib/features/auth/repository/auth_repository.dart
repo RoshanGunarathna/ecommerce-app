@@ -383,7 +383,6 @@ class AuthRepository {
   //get user data
   Stream<UserModel> getUserData({required String uid}) {
     return _users.doc(uid).snapshots().map((event) {
-      print(event.runtimeType);
       return UserModel.fromMap(event.data() as Map<String, dynamic>);
     });
   }

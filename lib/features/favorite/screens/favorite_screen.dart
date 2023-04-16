@@ -1,38 +1,28 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/palette.dart';
-import '../../home/widgets/bottom_bar.dart';
-import '../services/image_services.dart';
-import '../widgets/customGridView.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class FavoriteScreen extends StatefulWidget {
+import '../../../core/palette.dart';
+
+import '../../home/widgets/bottom_bar.dart';
+
+import '../widgets/productFutureBuilder.dart';
+
+class FavoriteScreen extends ConsumerStatefulWidget {
   const FavoriteScreen({super.key});
 
   @override
-  State<FavoriteScreen> createState() => _FavoriteScreenState();
+  ConsumerState<FavoriteScreen> createState() => _FavoriteScreenConsumerState();
 }
 
-class _FavoriteScreenState extends State<FavoriteScreen> {
-  final List<String> images = [];
-
-  void getImages() async {
-    final ImageServices imageServices = ImageServices();
-    final List<String> imgUrl = await imageServices.getRandomImages();
-    images.addAll(imgUrl);
-    setState(() {
-      images;
-    });
-  }
-
-  @override
-  void initState() {
-    getImages();
-    super.initState();
-  }
-
+class _FavoriteScreenConsumerState extends ConsumerState<FavoriteScreen> {
   void backtoHome() {
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => const BottomBar()));
+  }
+
+  void refresh() {
+    setState(() {});
   }
 
   @override
@@ -54,7 +44,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         ),
         elevation: 0,
       ),
-      body: CustomGridView(isHomeScreen: false, images: images),
+      body: ProductFutureBuilder(onTapFavoriteButton: refresh),
     );
   }
 }
