@@ -11,7 +11,7 @@ import '../../../model/category_model.dart';
 
 import '../controller/home_controller.dart';
 import '../widgets/carouselFutureBuilder.dart';
-import '../widgets/productStreamBuilder.dart';
+import '../widgets/productFutureBuilder.dart';
 
 final currentTimeProvider = StreamProvider.autoDispose<DateTime>((ref) {
   return Stream.periodic(const Duration(seconds: 1), (_) => DateTime.now());

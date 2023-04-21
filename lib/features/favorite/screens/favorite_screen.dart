@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,7 +7,8 @@ import '../../../core/palette.dart';
 
 import '../../home/widgets/bottom_bar.dart';
 
-import '../widgets/productFutureBuilder.dart';
+import '../controller/favorite_controller.dart';
+import '../widgets/customGridView.dart';
 
 class FavoriteScreen extends ConsumerStatefulWidget {
   const FavoriteScreen({super.key});
@@ -21,12 +23,23 @@ class _FavoriteScreenConsumerState extends ConsumerState<FavoriteScreen> {
         context, MaterialPageRoute(builder: (context) => const BottomBar()));
   }
 
-  void refresh() {
-    setState(() {});
+  void favoriteProductListRefresh() {
+    ref
+        .read(favoriteControllerProvider.notifier)
+        .updateFavoriteList(context: context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      favoriteProductListRefresh();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final favoriteProductList = ref.watch(favoriteProvider);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -44,7 +57,30 @@ class _FavoriteScreenConsumerState extends ConsumerState<FavoriteScreen> {
         ),
         elevation: 0,
       ),
-      body: ProductFutureBuilder(onTapFavoriteButton: refresh),
+      body: favoriteProductList != null
+          ? CustomGridView(
+              productList: favoriteProductList,
+            )
+          : Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  SizedBox(
+                    height: 120,
+                    width: 120,
+                    child: Icon(
+                      Icons.mood_bad_rounded,
+                      size: 100,
+                      color: Color.fromARGB(255, 226, 226, 226),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text('No products'),
+                ],
+              ),
+            ),
     );
   }
 }

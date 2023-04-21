@@ -9,7 +9,7 @@ class UserModel {
   final String address;
   final String email;
   final String photoUrl;
-  final List<dynamic> cart;
+  final List<ProductModel> cart;
   final DateTime? dateTime;
   final List<ProductModel>? favorite;
   UserModel({
@@ -29,7 +29,7 @@ class UserModel {
     String? address,
     String? email,
     String? photoUrl,
-    List<dynamic>? cart,
+    List<ProductModel>? cart,
     DateTime? dateTime,
     List<ProductModel>? favorite,
   }) {
@@ -55,7 +55,20 @@ class UserModel {
       'id': userModel.id,
       'photoUrl': userModel.photoUrl,
       'address': userModel.address,
-      'cart': userModel.cart,
+      'cart': userModel.cart.map((product) {
+        //Generate search Keywords
+        final List<String> searchKeyword = [];
+        final splittedMultipleWords = product.name.trim().split(" ");
+        for (var element in splittedMultipleWords) {
+          final String wordToLowercase = element.toLowerCase();
+          for (var i = 1; i < wordToLowercase.length + 1; i++) {
+            searchKeyword.add(wordToLowercase.substring(0, i));
+          }
+        }
+
+        return ProductModel.toMap(
+            productModel: product, searchKeyword: searchKeyword);
+      }).toList(),
       'searchKeyword': searchKeyword,
       'dateTime': userModel.dateTime.toString(),
       'favorite': userModel.favorite != null
@@ -84,7 +97,13 @@ class UserModel {
       id: map['id'] ?? '',
       photoUrl: map['photoUrl'] ?? '',
       address: map['address'] ?? '',
-      cart: map['cart'] ?? [],
+      cart: List<ProductModel>.from(
+        map['cart']?.map((res) {
+          final product = ProductModel.fromMap(res);
+
+          return product;
+        }),
+      ).toList(),
       dateTime:
           map['dateTime'] != null ? DateTime.parse(map['dateTime']) : null,
       favorite: map['favorite'] != null && map['favorite'].isNotEmpty

@@ -1,10 +1,12 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:ecommerce_app/features/cart/screens/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:ecommerce_app/model/product.dart';
 
 import '../../../core/palette.dart';
+import '../../../features/cart/controller/cart_controller.dart';
 import '../../../features/favorite/controller/favorite_controller.dart';
 
 class ProductCard extends ConsumerStatefulWidget {
@@ -33,6 +35,12 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
     }
   }
 
+  void addToCart() async {
+    final isAdded = await ref
+        .read(cartControllerProvider.notifier)
+        .addToCart(product: widget.product, context: context);
+  }
+
   Future<bool> removeAProductFromAFavoriteList() async {
     final isDeleted = await ref
         .read(favoriteControllerProvider.notifier)
@@ -52,6 +60,10 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
         widget.onTapFavoriteButton!();
       }
     }
+  }
+
+  void navigateToCartScreen() {
+    Navigator.pushNamed(context, CartScreen.routeName);
   }
 
   @override
@@ -93,7 +105,7 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
                           padding: const EdgeInsets.all(0),
                           color: primaryColor,
                           onPressed: favoriteButtonPress,
-                          icon: getIcon(),
+                          icon: getFavoriteIcon(),
                         ),
                       ),
                     ],
@@ -138,25 +150,10 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
                       ),
                       const SizedBox(
                         height: 8,
-                      )
+                      ),
                     ],
                   ),
-                  Container(
-                    height: 28,
-                    width: 28,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                      color: primaryColor,
-                    ),
-                    child: IconButton(
-                      padding: const EdgeInsets.all(0),
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.add,
-                        color: whiteColor,
-                      ),
-                    ),
-                  ),
+                  getAddIcon(),
                 ],
               ),
             ),
@@ -166,7 +163,7 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
     );
   }
 
-  Icon getIcon() {
+  Icon getFavoriteIcon() {
     final favoriteList = ref.watch(favoriteProvider);
 
     Icon icon = const Icon(Icons.favorite_outline_rounded);
@@ -182,5 +179,53 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
       }
     }
     return icon;
+  }
+
+  Widget getAddIcon() {
+    final cart = ref.watch(cartProvider);
+    bool isThisAddedToCart = false;
+    Widget returnWidget = Container(
+      height: 28,
+      width: 28,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        color: primaryColor,
+      ),
+      child: IconButton(
+        padding: const EdgeInsets.all(0),
+        onPressed: addToCart,
+        icon: const Icon(
+          Icons.add,
+          color: whiteColor,
+        ),
+      ),
+    );
+
+    if (cart.isNotEmpty) {
+      for (var product in cart) {
+        isThisAddedToCart = product.id == widget.product.id;
+        if (isThisAddedToCart) {
+          returnWidget = GestureDetector(
+            onTap: navigateToCartScreen,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              alignment: Alignment.center,
+              height: 28,
+              width: 80,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: primaryColor,
+              ),
+              child: const Text(
+                "Check Cart",
+                maxLines: 1,
+              ),
+            ),
+          );
+        }
+      }
+    }
+
+    return returnWidget;
   }
 }

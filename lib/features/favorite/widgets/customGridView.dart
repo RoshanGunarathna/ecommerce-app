@@ -6,11 +6,10 @@ import '../../../model/product.dart';
 
 class CustomGridView extends StatelessWidget {
   final List<ProductModel> productList;
-  final VoidCallback? onTapFavoriteButton;
+
   const CustomGridView({
     Key? key,
     required this.productList,
-    this.onTapFavoriteButton,
   }) : super(key: key);
 
   @override
@@ -33,7 +32,6 @@ class CustomGridView extends StatelessWidget {
                 return GestureDetector(
                   onTap: (() {}),
                   child: ProductCard(
-                    onTapFavoriteButton: onTapFavoriteButton,
                     product: product,
                   ),
                 );

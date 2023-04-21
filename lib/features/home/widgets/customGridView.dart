@@ -26,7 +26,7 @@ class CustomGridView extends StatelessWidget {
               bottom: 12,
             ),
             child: Text(
-              categoryName!,
+              categoryName,
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
           ),

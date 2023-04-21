@@ -2,6 +2,7 @@
 
 import 'category_model.dart';
 import 'rating.dart';
+import 'shipping_category_model.dart';
 
 class ProductModel {
   final String id;
@@ -16,6 +17,7 @@ class ProductModel {
   final double? kg;
   final int? discount;
   final DateTime? dateTime;
+  final ShippingCategoryModel shippingCategory;
   ProductModel({
     required this.id,
     required this.name,
@@ -26,6 +28,7 @@ class ProductModel {
     required this.price,
     required this.quantity,
     required this.kg,
+    required this.shippingCategory,
     this.rating,
     this.discount,
     this.dateTime,
@@ -49,6 +52,7 @@ class ProductModel {
       discount: map['discount'] != null ? map['discount'] as int : null,
       dateTime:
           map['dateTime'] != null ? DateTime.parse(map['dateTime']) : null,
+      shippingCategory: ShippingCategoryModel.fromMap(map['shippingCategory']),
     );
 
     return productModel;
@@ -86,6 +90,8 @@ class ProductModel {
       'discount': productModel.discount,
       'searchKeyword': searchKeyword,
       'dateTime': productModel.dateTime.toString(),
+      'shippingCategory': ShippingCategoryModel.toMap(
+          shippingCategoryModel: productModel.shippingCategory),
     };
   }
 

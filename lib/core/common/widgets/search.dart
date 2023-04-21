@@ -3,9 +3,13 @@ import 'package:avatar_glow/avatar_glow.dart';
 
 import 'package:ecommerce_app/features/search/screens/search_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
+import '../../../features/cart/controller/cart_controller.dart';
+import '../../../features/cart/screens/cart_screen.dart';
 import '../../palette.dart';
+import 'package:badges/badges.dart' as Badges;
 
 class Search extends StatefulWidget {
   final TextEditingController searchController;
@@ -55,6 +59,7 @@ class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
     bool shouldIGotoSearchScreen = true;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -156,16 +161,37 @@ class _SearchState extends State<Search> {
           ),
         ),
         InkWell(
-          onTap: () {},
+          onTap: () => {Navigator.pushNamed(context, CartScreen.routeName)},
           radius: 10,
-          child: Container(
-            height: 42,
-            margin: const EdgeInsets.symmetric(horizontal: 10),
-            child: const Icon(
-              Icons.shopping_cart_outlined,
-              color: primaryColor,
-              size: 30,
-            ),
+          child: Consumer(
+            builder: (context, ref, child) {
+              final userCartLength = ref.watch(cartProvider).length;
+
+              return userCartLength != 0
+                  ? Badges.Badge(
+                      badgeContent: Text(userCartLength.toString()),
+                      badgeStyle:
+                          const Badges.BadgeStyle(badgeColor: whiteColor),
+                      child: Container(
+                        height: 42,
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        child: const Icon(
+                          Icons.shopping_cart_outlined,
+                          color: primaryColor,
+                          size: 30,
+                        ),
+                      ),
+                    )
+                  : Container(
+                      height: 42,
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      child: const Icon(
+                        Icons.shopping_cart_outlined,
+                        color: primaryColor,
+                        size: 30,
+                      ),
+                    );
+            },
           ),
         ),
       ],

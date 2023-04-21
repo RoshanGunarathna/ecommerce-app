@@ -9,6 +9,7 @@ import '../../../core/common/error_text.dart';
 import '../../../core/constants/assets_path.dart';
 
 import '../../../model/user.dart';
+import '../../cart/controller/cart_controller.dart';
 import '../../home/widgets/bottom_bar.dart';
 import 'sign_up_screen.dart';
 
@@ -35,6 +36,10 @@ class _SplashScreenConsumerState extends ConsumerState<SplashScreen> {
     ref
         .read(favoriteControllerProvider.notifier)
         .updateFavoriteList(context: context);
+
+    //update cart list
+    // ignore: use_build_context_synchronously
+    ref.read(cartControllerProvider.notifier).updateCartList(context: context);
     setState(() {});
   }
 

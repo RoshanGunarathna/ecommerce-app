@@ -1,49 +1,107 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/palette.dart';
+import '../../../model/product.dart';
 import '../../payment/screens/payment_screen.dart';
-import '../services/image_services.dart';
-import '../widgets/product_card.dart';
 
-class CartScreen extends StatefulWidget {
+import '../controller/cart_controller.dart';
+import '../providers/cart_selected_item_provider.dart';
+import '../widgets/customGridView.dart';
+
+class CartScreen extends ConsumerStatefulWidget {
+  static const String routeName = "/cart-screen";
   const CartScreen({super.key});
 
   @override
-  State<CartScreen> createState() => _CartScreenState();
+  ConsumerState<CartScreen> createState() => _CartScreenConsumerState();
 }
 
-class _CartScreenState extends State<CartScreen> {
-  final List<String> images = [];
+class _CartScreenConsumerState extends ConsumerState<CartScreen> {
   final stickyKey = GlobalKey();
-  final List<int> deleteReadyList = [];
-
-  void getImages() async {
-    final ImageServices imageServices = ImageServices();
-    final List<String> imgUrl = await imageServices.getRandomImages();
-
-    images.addAll(imgUrl);
-    setState(() {
-      images;
-    });
-  }
-
-  @override
-  void initState() {
-    getImages();
-    super.initState();
-  }
 
   void navigateToBack(BuildContext context) {
     Navigator.pop(context);
   }
 
-  void addToDeleteReadyList(int index) {
-    deleteReadyList.add(index);
-    setState(() {});
+  void refreshCartList() {
+    ref.read(cartControllerProvider.notifier).updateCartList(context: context);
+  }
+
+  void addCartItemToSelectedItemProvider() {
+    ref
+        .read(cartSelectedItemProvider.notifier)
+        .update((state) => state = ref.read(cartProvider));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      refreshCartList();
+      addCartItemToSelectedItemProvider();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final List<ProductModel> cartStateProvider = ref.watch(cartProvider);
+    final List<ProductModel>? selectedItem =
+        ref.watch(cartSelectedItemProvider);
+    int selectedItems = 0;
+    double subTotal = 0.0;
+    int discount = 0;
+    int discountPrice = 0;
+    double shippingCost = 0.0;
+    double total = 0.0;
+
+    //calculation
+    if (selectedItem != null && selectedItem.isNotEmpty) {
+      //selected item
+      selectedItems = selectedItem.length;
+
+      for (ProductModel product in selectedItem) {
+        //SubTotal
+        subTotal += product.price;
+        if (product.discount != null) {
+          discountPrice += product.discount!;
+        }
+      }
+
+      //Discount percentage
+      final subTotalPrice = subTotal.round();
+      final afterDiscount = subTotalPrice - discountPrice;
+      discount =
+          ((subTotalPrice - afterDiscount) / subTotalPrice * 100).round();
+
+      //For shippingCost
+      List<String> sellerIdList = [];
+      selectedItem.forEach((element) {
+        sellerIdList.add(element.sellerUserId);
+      });
+      sellerIdList = sellerIdList.toSet().toList();
+
+      List<double> shippingPriceList = [];
+
+      for (var i = 0; i < sellerIdList.length; i++) {
+        List<double> tempShippingPriceList = [];
+        for (var element in selectedItem) {
+          if (element.sellerUserId == sellerIdList[i]) {
+            tempShippingPriceList.add(element.shippingCategory.price);
+          }
+          tempShippingPriceList = tempShippingPriceList.toSet().toList();
+        }
+        shippingPriceList.addAll(tempShippingPriceList);
+      }
+      if (shippingPriceList.isNotEmpty) {
+        shippingCost =
+            shippingPriceList.reduce((value, element) => value + element);
+      }
+
+      total = subTotal - discountPrice + shippingCost;
+    }
+
     var fontSize = const TextStyle(fontSize: 15);
 
     var size = MediaQuery.of(context).size;
@@ -69,148 +127,180 @@ class _CartScreenState extends State<CartScreen> {
         ),
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        physics: const ScrollPhysics(),
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Column(
-            children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: size.height * 0.6),
-                child: ListView.builder(
-                  physics: const ScrollPhysics(),
-                  shrinkWrap: true,
-                  scrollDirection: Axis.vertical,
-                  itemCount: images.length,
-                  itemBuilder: (context, index) {
-                    final image = images[index];
-                    final bool isDeleteButtonPressed =
-                        deleteReadyList.contains(index);
-
-                    return GestureDetector(
-                      onTap: () {},
-                      child: ProductCard(
-                        image: image,
-                        onPressedDelete: () {
-                          addToDeleteReadyList(index);
-                        },
-                        isDeleteButtonPresed: isDeleteButtonPressed,
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Selected Items (2)',
-                            style: fontSize,
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            'Discount',
-                            style: fontSize,
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text('Shipping', style: fontSize),
-                        ],
-                      ),
-                      Column(
-                        key: stickyKey,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Total : \$ 200',
-                            style: fontSize,
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            '15 %',
-                            style: fontSize,
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            '\$ 6',
-                            style: fontSize,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  const Divider(
-                    thickness: 1.5,
-                    color: blackColorShade1,
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Total',
-                        style: fontSize,
-                      ),
-                      Text(
-                        '\$ 202',
-                        style: fontSize,
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: size.height * 0.04,
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        backgroundColor: primaryColor,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 15,
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const PaymentScreen()));
-                      },
-                      child: const Text(
-                        'Pay Now',
-                        style: TextStyle(fontSize: 25),
+      body: cartStateProvider.isNotEmpty
+          ? SingleChildScrollView(
+              physics: const ScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Column(
+                  children: [
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: size.height * 0.6),
+                      child: CustomGridView(
+                        productList: cartStateProvider,
                       ),
                     ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Selected Items ($selectedItems)',
+                                  style: fontSize,
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                discount != 0
+                                    ? Text(
+                                        'Discount',
+                                        style: fontSize,
+                                      )
+                                    : const SizedBox(),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                Text('Shipping', style: fontSize),
+                              ],
+                            ),
+                            Column(
+                              key: stickyKey,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'Sub Total : \$ $subTotal',
+                                  style: fontSize,
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                discount != 0
+                                    ? Text(
+                                        '\$ $discountPrice ($discount%)',
+                                        style: fontSize,
+                                      )
+                                    : const SizedBox(),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                shippingCost != 0
+                                    ? Text(
+                                        '\$ $shippingCost',
+                                        style: fontSize,
+                                      )
+                                    : Text(
+                                        'Free shipping : \$ $shippingCost',
+                                        style: fontSize,
+                                      ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        const Divider(
+                          thickness: 1.5,
+                          color: blackColorShade1,
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Total',
+                              style: fontSize,
+                            ),
+                            Text(
+                              '\$ $total',
+                              style: fontSize,
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: size.height * 0.04,
+                        ),
+                        selectedItems != 0
+                            ? SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    backgroundColor: primaryColor,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 15,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) =>
+                                                const PaymentScreen()));
+                                  },
+                                  child: const Text(
+                                    'Pay Now',
+                                    style: TextStyle(fontSize: 25),
+                                  ),
+                                ),
+                              )
+                            : SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    backgroundColor: grayColor,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 15,
+                                    ),
+                                  ),
+                                  onPressed: () {},
+                                  child: const Text(
+                                    'Pay Now',
+                                    style: TextStyle(fontSize: 25),
+                                  ),
+                                ),
+                              ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  SizedBox(
+                    height: 120,
+                    width: 120,
+                    child: Icon(
+                      Icons.mood_bad_rounded,
+                      size: 100,
+                      color: Color.fromARGB(255, 226, 226, 226),
+                    ),
                   ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text('No products'),
                 ],
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }
