@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
 
 // Logo
-const String logoPath = "assets/logos/g_logo.png";
+const String logoPath = "assets/logos/logo.png";
 const String facebookPath = "assets/logos/facebook.png";
 const String googlePath = "assets/logos/google.png";
 const String linkedInPath = "assets/logos/linkedin.png";

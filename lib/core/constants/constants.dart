@@ -1,4 +1,9 @@
+//for get dateTime now
 const String dateTimeUri = 'https://www.timeapi.io';
+
+//for get payment
+const String SECRET_KEY =
+    'sk_test_51N81eQEVNDXbbeD5Gi6eFGEQ1BCipQw9A8PrqU51eTiZ8Uk5vpDsOpp1253VUhIiITlh0vNfHYPlhRe0CNCSaKD900v0hNvL0i';
 
 class Constants {
   static const String avatarDefault =

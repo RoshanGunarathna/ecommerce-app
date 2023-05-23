@@ -1,370 +1,434 @@
-import 'package:carousel_slider/carousel_slider.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 
+import '../../../core/common/widgets/add_address_dialog_box.dart';
+import '../../../core/constants/constants.dart';
 import '../../../core/palette.dart';
-import '../model/card_model.dart';
-import '../widgets/carouselImage.dart';
-import '../widgets/order_confirm_dialog_box.dart';
+import '../../../model/address_model.dart';
 
-class PaymentScreen extends StatefulWidget {
-  const PaymentScreen({super.key});
+import '../../../model/cart_selected_product_model.dart';
+import '../../address/controller/address_controller.dart';
+
+import '../../home/widgets/bottom_bar.dart';
+import '../widgets/customGridView.dart';
+
+import 'package:http/http.dart' as http;
+
+//visa card
+// 4242 4242 4242 4242
+//12/34
+//567
+
+class PaymentScreen extends ConsumerStatefulWidget {
+  static const String routeName = "/paymentScreen";
+  final double total;
+
+  final List<CartSelectedProductModel> selectedProductList;
+
+  const PaymentScreen({
+    super.key,
+    required this.total,
+    required this.selectedProductList,
+  });
 
   @override
-  State<PaymentScreen> createState() => _PaymentScreenState();
+  ConsumerState<PaymentScreen> createState() => _PaymentScreenConsumerState();
 }
 
-class _PaymentScreenState extends State<PaymentScreen> {
-//Carousel
-  CarouselController _cardController = CarouselController();
+class _PaymentScreenConsumerState extends ConsumerState<PaymentScreen> {
+  List<AddressModel> _addressList = [];
+  AddressModel? _selectedAddress = null;
+
+  //payment
+  Map<String, dynamic>? paymentIntent;
+
+  Future<void> makePayment() async {
+    try {
+      paymentIntent =
+          await createPaymentIntent('${widget.total.round()}', 'USD');
+      //Payment Sheet
+      await Stripe.instance
+          .initPaymentSheet(
+            paymentSheetParameters: SetupPaymentSheetParameters(
+                paymentIntentClientSecret: paymentIntent!['client_secret'],
+                // applePay: const PaymentSheetApplePay(merchantCountryCode: '+92',),
+                // googlePay: const PaymentSheetGooglePay(testEnv: true, currencyCode: "US", merchantCountryCode: "+92"),
+                style: ThemeMode.dark,
+                merchantDisplayName: 'Adnan'),
+          )
+          .then((value) {});
+
+      ///now finally display payment sheeet
+      displayPaymentSheet();
+    } catch (e, s) {
+      print('exception:$e$s');
+    }
+  }
+
+  displayPaymentSheet() async {
+    try {
+      await Stripe.instance.presentPaymentSheet().then((value) {
+        showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
+                          ),
+                          Text("Payment Successfull"),
+                        ],
+                      ),
+                    ],
+                  ),
+                ));
+        // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("paid successfully")));
+
+        paymentIntent = null;
+      }).onError((error, stackTrace) {
+        print('Error is:--->$error $stackTrace');
+      });
+    } on StripeException catch (e) {
+      print('Error is:---> $e');
+      showDialog(
+          context: context,
+          builder: (_) => const AlertDialog(
+                content: Text("Cancelled "),
+              ));
+    } catch (e) {
+      print('$e');
+    }
+  }
+
+  //  Future<Map<String, dynamic>>
+  createPaymentIntent(String amount, String currency) async {
+    try {
+      Map<String, dynamic> body = {
+        'amount': calculateAmount(amount),
+        'currency': currency,
+        'payment_method_types[]': 'card'
+      };
+
+      var response = await http.post(
+        Uri.parse('https://api.stripe.com/v1/payment_intents'),
+        headers: {
+          'Authorization': 'Bearer $SECRET_KEY',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: body,
+      );
+      // ignore: avoid_print
+      print('Payment Intent Body->>> ${response.body.toString()}');
+      return jsonDecode(response.body);
+    } catch (err) {
+      // ignore: avoid_print
+      print('err charging user: ${err.toString()}');
+    }
+  }
+
+  calculateAmount(String amount) {
+    final calculatedAmout = (int.parse(amount)) * 100;
+    return calculatedAmout.toString();
+  }
 
 //navigation
   void navigateToBack(BuildContext context) {
     Navigator.pop(context);
   }
 
-  List<CardModel> cards = [
-    CardModel(
-        cardType: 'visa', cardImage: 'assets/images/payment/visacard.png'),
-    CardModel(
-        cardType: 'master', cardImage: 'assets/images/payment/mastercard.png'),
-    CardModel(
-        cardType: 'american_express',
-        cardImage: 'assets/images/payment/american_express.png'),
-  ];
+  void backtoHome() {
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => const BottomBar()));
+  }
 
 //show confirm Dialog
-  void showConfirmDialog() {
+  // void showConfirmDialog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (_) => const OrderConfirmDialog(),
+  //   );
+  // }
+
+  //show addEdit Dialog
+  void addEditAddressDialog(AddressModel? address, int? index) {
     showDialog(
       context: context,
-      builder: (_) => const OrderConfirmDialog(),
+      builder: (_) => AddEditDialog(address: address, index: index),
     );
+  }
+
+  void refreshLocalAddressList() {
+    ref
+        .read(addressControllerProvider.notifier)
+        .updateLocalAddressList(context: context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Stripe.publishableKey =
+        "pk_test_51N81eQEVNDXbbeD5Mlv6RUJ58XWKecQbdDSTQtJqYsbXPvpumntGbjRfgkCKX30vkhrvdubElJe7dyV6tRMi3t5D00XrCA8IZB";
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      refreshLocalAddressList();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    var formTextStyle = const TextStyle(fontSize: 16);
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: () {
-            navigateToBack(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back_rounded,
-            color: blackColorShade1,
-            size: 35,
+    final _res = ref.watch(addressProvider);
+    final size = MediaQuery.of(context).size;
+
+    if (_res.isNotEmpty) {
+      _addressList = _res;
+
+      _selectedAddress ??= _res[0];
+    }
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          leading: IconButton(
+            onPressed: () {
+              navigateToBack(context);
+            },
+            icon: const Icon(
+              Icons.arrow_back_rounded,
+              color: blackColorShade1,
+              size: 35,
+            ),
           ),
-        ),
-        title: const Text(
-          "Payment",
-          style: TextStyle(
+          title: const Text(
+            "Payment",
+            style: TextStyle(
               color: blackColorShade1,
               fontSize: 25,
-              fontWeight: FontWeight.w500),
-        ),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CarouselImage(cards: cards, cardController: _cardController),
-            const SizedBox(
-              height: 10,
+              fontWeight: FontWeight.w500,
             ),
-            Padding(
-              padding: const EdgeInsets.all(14.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Add a new payment method',
-                    style: TextStyle(
-                        color: blackColorShade1,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  Row(
-                    children: [
-                      SingleChildScrollView(
-                        physics: const ScrollPhysics(),
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              height: 70,
-                              width: 70,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(40),
-                                child: DecoratedBox(
-                                  decoration: const BoxDecoration(
-                                      color: blackColorShade2),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(3.0),
-                                    child: Image.asset(
-                                      'assets/images/payment/american_express_logo.jpeg',
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 25,
-                            ),
-                            SizedBox(
-                              height: 70,
-                              width: 70,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(40),
-                                child: DecoratedBox(
-                                  decoration: const BoxDecoration(
-                                      color: blackColorShade2),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(3.0),
-                                    child: Image.asset(
-                                      'assets/images/payment/visacard_logo.png',
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 25,
-                            ),
-                            SizedBox(
-                              height: 70,
-                              width: 70,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(40),
-                                child: DecoratedBox(
-                                  decoration: const BoxDecoration(
-                                      color: blackColorShade2),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(3.0),
-                                    child: Image.asset(
-                                      'assets/images/payment/mastercard_logo.png',
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 25,
-                      ),
-                      InkWell(
-                        onLongPress: () {},
-                        child: SizedBox(
-                          height: 70,
-                          width: 70,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(40),
-                            child: const DecoratedBox(
-                              decoration:
-                                  BoxDecoration(color: blackColorShade2),
-                              child: Padding(
-                                padding: EdgeInsets.all(3.0),
-                                child: Icon(Icons.add),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 40,
-                  ),
-                  Form(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Card Number',
-                          style: formTextStyle,
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        TextFormField(
-                          cursorColor: blackColor,
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.only(bottom: 8),
-                            isDense: true,
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: blackColor, width: 2),
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: blackColor, width: 1),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            SizedBox(
-                              width: 100,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Expiry Date',
-                                    style: formTextStyle,
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  TextFormField(
-                                    cursorColor: blackColor,
-                                    decoration: const InputDecoration(
-                                      contentPadding:
-                                          EdgeInsets.only(bottom: 8),
-                                      isDense: true,
-                                      focusedBorder: UnderlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: blackColor, width: 2),
-                                      ),
-                                      enabledBorder: UnderlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: blackColor, width: 1),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(
-                              width: 100,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'CVV',
-                                    style: formTextStyle,
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  TextFormField(
-                                    cursorColor: blackColor,
-                                    decoration: const InputDecoration(
-                                      contentPadding:
-                                          EdgeInsets.only(bottom: 8),
-                                      isDense: true,
-                                      focusedBorder: UnderlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: blackColor, width: 2),
-                                      ),
-                                      enabledBorder: UnderlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: blackColor, width: 1),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        Text(
-                          'Card Number',
-                          style: formTextStyle,
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        TextFormField(
-                          cursorColor: blackColor,
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.only(bottom: 8),
-                            isDense: true,
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: blackColor, width: 2),
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: blackColor, width: 1),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        SizedBox(
-                          width: double.infinity,
-                          child: Center(
-                            child: Text(
-                              'Select Cart Information',
-                              style: formTextStyle,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Total',
-                              style: formTextStyle,
-                            ),
-                            Text(
-                              '\$149.93',
-                              style: formTextStyle,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              backgroundColor: primaryColor,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 15,
-                              ),
-                            ),
-                            onPressed: () {
-                              showConfirmDialog();
-                            },
-                            child: Text(
-                              'Pay Now',
-                              style: formTextStyle,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 8,
-                        ),
-                      ],
+          ),
+          elevation: 0,
+          actions: [
+            IconButton(
+              onPressed: backtoHome,
+              icon: Icon(
+                Icons.home_outlined,
+                color: blackColorShade1,
+                size: 30,
+              ),
+            ),
+          ],
+        ),
+        body: CustomScrollView(
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Select Your Address',
+                      style: TextStyle(
+                          color: blackColorShade1,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500),
                     ),
-                  ),
-                ],
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    SizedBox(
+                      height: size.height * 0.05,
+                      child: Row(
+                        children: [
+                          _selectedAddress != null
+                              ? Expanded(
+                                  child: Row(
+                                    children: [
+                                      DropdownButton(
+                                        value: _selectedAddress!.address,
+                                        icon: const Icon(
+                                            Icons.keyboard_arrow_down),
+                                        items: _addressList
+                                            .map((AddressModel item) {
+                                          return DropdownMenuItem(
+                                            value: item.address,
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                    "${item.fullName.split(" ").elementAt(0)} ${item.address.split(" ").elementAt(0)}",
+                                                    overflow:
+                                                        TextOverflow.ellipsis),
+                                                const SizedBox(
+                                                  width: 5,
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (String? address) {
+                                          setState(() {
+                                            _selectedAddress = _addressList
+                                                .firstWhere((element) =>
+                                                    element.address == address);
+                                          });
+                                        },
+                                      ),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : const SizedBox(),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              elevation: 0,
+                            ),
+                            onPressed: () => addEditAddressDialog(null, null),
+                            child: const Text("Add New"),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    SizedBox(
+                        height: size.height * 0.45,
+                        child: CustomGridView(
+                            productList: widget.selectedProductList)),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          SizedBox(
+                            height: 10,
+                          ),
+                          _selectedAddress != null
+                              ? Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text("To :"),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(_selectedAddress!.fullName),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Text(
+                                                _selectedAddress!.mobileNumber),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Text(_selectedAddress!.address),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Text(_selectedAddress!.cityTown),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Text(_selectedAddress!.province),
+                                            SizedBox(
+                                              height: 20,
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Total",
+                                          style: TextStyle(fontSize: 20),
+                                        ),
+                                        SizedBox(
+                                          width: 15,
+                                        ),
+                                        Text(
+                                          "${widget.total.round()}\$",
+                                          style: TextStyle(fontSize: 30),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                )
+                              : const SizedBox(),
+                          _selectedAddress != null
+                              ? SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      backgroundColor: primaryColor,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 15,
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      await makePayment();
+                                    },
+                                    child: const Text(
+                                      'Pay Now',
+                                      style: TextStyle(fontSize: 25),
+                                    ),
+                                  ),
+                                )
+                              : SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      backgroundColor: grayColor,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 15,
+                                      ),
+                                    ),
+                                    onPressed: () {},
+                                    child: const Text(
+                                      'Pay Now',
+                                      style: TextStyle(fontSize: 25),
+                                    ),
+                                  ),
+                                ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

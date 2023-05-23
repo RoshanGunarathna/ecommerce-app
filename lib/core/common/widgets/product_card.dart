@@ -11,12 +11,10 @@ import '../../../features/favorite/controller/favorite_controller.dart';
 
 class ProductCard extends ConsumerStatefulWidget {
   final ProductModel product;
-  final Function? onTapFavoriteButton;
 
   const ProductCard({
     Key? key,
     required this.product,
-    this.onTapFavoriteButton,
   }) : super(key: key);
 
   @override
@@ -25,6 +23,7 @@ class ProductCard extends ConsumerStatefulWidget {
 
 class _ProductCardConsumerState extends ConsumerState<ProductCard> {
   bool isThisFavorite = false;
+  bool isCartMethodRunning = false;
 
   void addToFavoriteList() async {
     final isAdded = await ref
@@ -36,9 +35,12 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
   }
 
   void addToCart() async {
-    final isAdded = await ref
-        .read(cartControllerProvider.notifier)
-        .addToCart(product: widget.product, context: context);
+    print(isCartMethodRunning);
+    if (isCartMethodRunning == false) {
+      final isAdded = await ref
+          .read(cartControllerProvider.notifier)
+          .addToCart(product: widget.product, context: context);
+    }
   }
 
   Future<bool> removeAProductFromAFavoriteList() async {
@@ -56,9 +58,6 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
     } else {
       isThisFavorite = false;
       final isDeleted = await removeAProductFromAFavoriteList();
-      if (isDeleted) {
-        widget.onTapFavoriteButton!();
-      }
     }
   }
 
@@ -68,6 +67,8 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
 
   @override
   Widget build(BuildContext context) {
+    isCartMethodRunning = ref.watch(cartControllerProvider);
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -76,7 +77,7 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
       child: Column(
         children: [
           Expanded(
-            flex: 4,
+            flex: 2,
             child: Stack(
               children: [
                 Container(
@@ -126,7 +127,9 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.product.name,
+                        widget.product.name.length > 12
+                            ? "${widget.product.name.substring(0, 10)}.."
+                            : widget.product.name,
                         style: const TextStyle(
                             color: blackColorShade1,
                             fontSize: 15,
@@ -137,7 +140,8 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
                       ),
                       RichText(
                         text: TextSpan(
-                            text: '\$${widget.product.price}',
+                            text:
+                                '\$${widget.product.price.toStringAsFixed(2)}',
                             style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -168,16 +172,15 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
 
     Icon icon = const Icon(Icons.favorite_outline_rounded);
 
-    if (favoriteList != null) {
-      if (favoriteList.isNotEmpty) {
-        for (var e in favoriteList) {
-          if (e.id == widget.product.id) {
-            icon = const Icon(Icons.favorite_rounded);
-            isThisFavorite = true;
-          }
+    if (favoriteList.isNotEmpty) {
+      for (var e in favoriteList) {
+        if (e.id == widget.product.id) {
+          icon = const Icon(Icons.favorite_rounded);
+          isThisFavorite = true;
         }
       }
     }
+
     return icon;
   }
 
@@ -205,20 +208,20 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
       for (var product in cart) {
         isThisAddedToCart = product.id == widget.product.id;
         if (isThisAddedToCart) {
-          returnWidget = GestureDetector(
-            onTap: navigateToCartScreen,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
-              alignment: Alignment.center,
-              height: 28,
-              width: 80,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: primaryColor,
-              ),
-              child: const Text(
-                "Check Cart",
-                maxLines: 1,
+          returnWidget = Container(
+            height: 28,
+            width: 28,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              color: primaryColor,
+            ),
+            child: IconButton(
+              padding: const EdgeInsets.all(0),
+              onPressed: navigateToCartScreen,
+              icon: const Icon(
+                Icons.shopping_bag_rounded,
+                color: whiteColor,
+                size: 16,
               ),
             ),
           );

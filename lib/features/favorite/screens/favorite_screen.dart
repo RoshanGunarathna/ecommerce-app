@@ -57,9 +57,12 @@ class _FavoriteScreenConsumerState extends ConsumerState<FavoriteScreen> {
         ),
         elevation: 0,
       ),
-      body: favoriteProductList != null
-          ? CustomGridView(
-              productList: favoriteProductList,
+      body: favoriteProductList.isNotEmpty
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: CustomGridView(
+                productList: favoriteProductList,
+              ),
             )
           : Center(
               child: Column(

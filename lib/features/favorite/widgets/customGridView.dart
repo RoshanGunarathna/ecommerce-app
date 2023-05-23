@@ -14,29 +14,30 @@ class CustomGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return SingleChildScrollView(
       child: Column(
         children: [
-          SizedBox(
-            height: 460,
-            child: GridView.builder(
-              scrollDirection: Axis.vertical,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  mainAxisExtent: 220,
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 15,
-                  mainAxisSpacing: 15),
-              itemCount: productList.length,
-              itemBuilder: (context, index) {
-                final product = productList[index];
-                return GestureDetector(
-                  onTap: (() {}),
-                  child: ProductCard(
-                    product: product,
-                  ),
-                );
-              },
+          GridView.builder(
+            shrinkWrap: true,
+            scrollDirection: Axis.vertical,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              childAspectRatio: size.width / (size.height / 4),
+              mainAxisExtent: size.height / 4,
+              crossAxisCount: 2,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
             ),
+            itemCount: productList.length,
+            itemBuilder: (context, index) {
+              final product = productList[index];
+              return GestureDetector(
+                onTap: (() {}),
+                child: ProductCard(
+                  product: product,
+                ),
+              );
+            },
           )
         ],
       ),

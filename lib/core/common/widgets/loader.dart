@@ -1,3 +1,4 @@
+import 'package:ecommerce_app/core/palette.dart';
 import 'package:flutter/material.dart';
 
 class Loader extends StatelessWidget {
@@ -5,8 +6,19 @@ class Loader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: CircularProgressIndicator.adaptive(),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: const [
+          CircularProgressIndicator.adaptive(
+              valueColor: AlwaysStoppedAnimation<Color>(primaryColor)),
+          SizedBox(
+            height: 20,
+          ),
+          Text('We are Loading..'),
+        ],
+      ),
     );
   }
 }

@@ -5,10 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkedin_login/linkedin_login.dart';
 
-import '../../favorite/controller/favorite_controller.dart';
-import '../../home/screens/home_screen.dart';
-import '../../home/widgets/bottom_bar.dart';
 import '../repository/auth_repository.dart';
+import '../screens/sign_in_screen.dart';
 
 //user provider
 final userProvider = StateProvider<UserModel?>((ref) => null);
@@ -48,15 +46,12 @@ class AuthController extends StateNotifier<bool> {
 //google sign-in
   void signInWithGoogle(BuildContext context) async {
     state = true;
-    final user = await _authRepository.signinWithGoogle(context);
+    final user = await _authRepository.signInWithGoogle(context);
     state = false;
     user.fold((l) {
       showSnackBar(context: context, text: l.message);
     }, (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
-      updateFavoriteList(context: context);
-      Navigator.pushNamedAndRemoveUntil(
-          context, BottomBar.routeName, (route) => false);
     });
   }
 
@@ -69,9 +64,6 @@ class AuthController extends StateNotifier<bool> {
       showSnackBar(context: context, text: l.message);
     }, (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
-      updateFavoriteList(context: context);
-      Navigator.pushNamedAndRemoveUntil(
-          context, BottomBar.routeName, (route) => false);
     });
   }
 
@@ -88,9 +80,6 @@ class AuthController extends StateNotifier<bool> {
     user.fold((l) => showSnackBar(context: context, text: l.message),
         (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
-      updateFavoriteList(context: context);
-      Navigator.pushNamedAndRemoveUntil(
-          context, BottomBar.routeName, (route) => false);
     });
   }
 
@@ -108,9 +97,6 @@ class AuthController extends StateNotifier<bool> {
       showSnackBar(context: context, text: l.message);
     }, (userModel) {
       _ref.read(userProvider.notifier).update((state) => userModel);
-      updateFavoriteList(context: context);
-      Navigator.pushNamedAndRemoveUntil(
-          context, BottomBar.routeName, (route) => false);
     });
   }
 
@@ -132,29 +118,38 @@ class AuthController extends StateNotifier<bool> {
       },
       (userModel) {
         _ref.read(userProvider.notifier).update((state) => userModel);
-        updateFavoriteList(context: context);
-        Navigator.pushNamedAndRemoveUntil(
-            context, HomeScreen.routeName, (route) => false);
+      },
+    );
+  }
+
+  //Sign Out
+  void signOut({
+    required BuildContext context,
+  }) async {
+    state = true;
+    final user = await _authRepository.signOut();
+    state = false;
+    user.fold(
+      (l) {
+        showSnackBar(context: context, text: l.message);
+      },
+      (r) {
+        showSnackBar(context: context, text: "LogOut Successful!");
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => SignInScreen()),
+            (route) => false);
       },
     );
   }
 
 //get current user data
-  Stream<UserModel> getUserData(String uid) {
+  Stream<UserModel?> getUserData(String uid) {
     return _authRepository.getUserData(uid: uid);
   }
 
   //linkedIN error handling
   void linkedInErrorHandling({required String error}) {
     print("Linkedin Error: error");
-  }
-
-  void updateFavoriteList({required BuildContext context}) {
-    _ref
-        .read(favoriteControllerProvider.notifier)
-        .getFavoriteProductData(context)
-        .then((favoriteProductList) => _ref
-            .read(favoriteProvider.notifier)
-            .update((state) => favoriteProductList!));
   }
 }

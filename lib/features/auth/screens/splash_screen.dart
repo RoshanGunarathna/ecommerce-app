@@ -26,20 +26,24 @@ class _SplashScreenConsumerState extends ConsumerState<SplashScreen> {
     userModel = await ref
         .watch(authControllerProvider.notifier)
         .getUserData(data.uid)
-        .first;
+        .firstWhere((element) => element != null);
 
-    //update user
-    ref.read(userProvider.notifier).update((state) => userModel);
+    if (userModel != null) {
+      //update user
+      ref.read(userProvider.notifier).update((state) => userModel);
+      // update Favorite Product List
+      // ignore: use_build_context_synchronously
+      ref
+          .read(favoriteControllerProvider.notifier)
+          .updateFavoriteList(context: context);
 
-    //update Favorite Product List
-    //ignore: use_build_context_synchronously
-    ref
-        .read(favoriteControllerProvider.notifier)
-        .updateFavoriteList(context: context);
+      // update cart list
+      //ignore: use_build_context_synchronously
+      ref
+          .read(cartControllerProvider.notifier)
+          .updateCartList(context: context);
+    }
 
-    //update cart list
-    // ignore: use_build_context_synchronously
-    ref.read(cartControllerProvider.notifier).updateCartList(context: context);
     setState(() {});
   }
 
@@ -51,9 +55,31 @@ class _SplashScreenConsumerState extends ConsumerState<SplashScreen> {
               getData(ref, data);
               if (userModel != null) {
                 return const BottomBar();
+                // return const CartScreen();
               }
+            } else {
+              return const SignUpScreen();
             }
-            return const SignUpScreen();
+            return Scaffold(
+              body: Center(
+                child: SizedBox(
+                  height: 200,
+                  width: 200,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Image.asset(
+                      logoPath,
+                      fit: BoxFit.contain,
+                    ),
+                    // child: Container(
+                    //   height: 50,
+                    //   width: 50,
+                    //   color: Colors.blue,
+                    // ),
+                  ),
+                ),
+              ),
+            );
           },
           error: (error, stackTrace) => ErrorText(error: error.toString()),
           loading: () {

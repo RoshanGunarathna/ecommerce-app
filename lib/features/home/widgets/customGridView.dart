@@ -16,6 +16,7 @@ class CustomGridView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isProductNull = productList.isEmpty;
+    final size = MediaQuery.of(context).size;
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -32,15 +33,16 @@ class CustomGridView extends StatelessWidget {
           ),
           isProductNull == false
               ? SizedBox(
-                  height: 460,
+                  height: size.height / 2.1,
                   child: GridView.builder(
                     scrollDirection: Axis.horizontal,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                            mainAxisExtent: 220,
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 15,
-                            mainAxisSpacing: 15),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      childAspectRatio: size.width / (size.height / 4),
+                      mainAxisExtent: size.width / 2.5,
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
                     itemCount: productList.length,
                     itemBuilder: (context, index) {
                       final product = productList[index];

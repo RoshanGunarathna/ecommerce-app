@@ -1,21 +1,22 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 
-import '../../../model/product.dart';
+import '../../../model/cart_selected_product_model.dart';
+
 import 'product_card.dart';
 
 class CustomGridView extends StatelessWidget {
-  final List<ProductModel> productList;
-  final VoidCallback? onTapFavoriteButton;
+  final List<CartSelectedProductModel> productList;
+
   const CustomGridView({
     Key? key,
     required this.productList,
-    this.onTapFavoriteButton,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
+      shrinkWrap: true,
       scrollDirection: Axis.vertical,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           mainAxisExtent: 120,

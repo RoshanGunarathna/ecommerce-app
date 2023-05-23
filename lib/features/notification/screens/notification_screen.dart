@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/common/controller/common_get_product_controller.dart';
 import '../../../core/palette.dart';
 import '../../home/widgets/bottom_bar.dart';
 

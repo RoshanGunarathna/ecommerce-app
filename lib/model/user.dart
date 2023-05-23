@@ -2,16 +2,18 @@
 
 import 'package:ecommerce_app/model/product.dart';
 
+import 'address_model.dart';
+
 class UserModel {
   final String id;
   final String name;
 
-  final String address;
+  final List<AddressModel> address;
   final String email;
   final String photoUrl;
   final List<ProductModel> cart;
   final DateTime? dateTime;
-  final List<ProductModel>? favorite;
+  final List<ProductModel> favorite;
   UserModel({
     required this.id,
     required this.name,
@@ -20,13 +22,13 @@ class UserModel {
     required this.photoUrl,
     required this.cart,
     this.dateTime,
-    this.favorite,
+    required this.favorite,
   });
 
   UserModel copyWith({
     String? id,
     String? name,
-    String? address,
+    List<AddressModel>? address,
     String? email,
     String? photoUrl,
     List<ProductModel>? cart,
@@ -54,7 +56,7 @@ class UserModel {
       'name': userModel.name,
       'id': userModel.id,
       'photoUrl': userModel.photoUrl,
-      'address': userModel.address,
+      'address': userModel.address.map((address) => address.toMap()).toList(),
       'cart': userModel.cart.map((product) {
         //Generate search Keywords
         final List<String> searchKeyword = [];
@@ -71,8 +73,8 @@ class UserModel {
       }).toList(),
       'searchKeyword': searchKeyword,
       'dateTime': userModel.dateTime.toString(),
-      'favorite': userModel.favorite != null
-          ? userModel.favorite!.map((product) {
+      'favorite': userModel.favorite.isNotEmpty
+          ? userModel.favorite.map((product) {
               //Generate search Keywords
               final List<String> searchKeyword = [];
               final splittedMultipleWords = product.name.trim().split(" ");
@@ -86,7 +88,7 @@ class UserModel {
               return ProductModel.toMap(
                   productModel: product, searchKeyword: searchKeyword);
             }).toList()
-          : null,
+          : [],
     };
   }
 
@@ -96,7 +98,13 @@ class UserModel {
       name: map['name'] ?? '',
       id: map['id'] ?? '',
       photoUrl: map['photoUrl'] ?? '',
-      address: map['address'] ?? '',
+      address: (map['address']).isNotEmpty
+          ? List<AddressModel>.from(
+              map['address'].map(
+                (address) => AddressModel.fromMap(address),
+              ),
+            )
+          : [],
       cart: List<ProductModel>.from(
         map['cart']?.map((res) {
           final product = ProductModel.fromMap(res);
@@ -106,13 +114,13 @@ class UserModel {
       ).toList(),
       dateTime:
           map['dateTime'] != null ? DateTime.parse(map['dateTime']) : null,
-      favorite: map['favorite'] != null && map['favorite'].isNotEmpty
+      favorite: (map['favorite'] as List).isNotEmpty
           ? List<ProductModel>.from(map['favorite']?.map((res) {
               final product = ProductModel.fromMap(res);
 
               return product;
             }))
-          : null,
+          : [],
     );
   }
 

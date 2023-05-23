@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -18,11 +17,10 @@ import 'package:linkedin_login/linkedin_login.dart';
 import '../../../core/common/controller/common_get_date_and_time_controller.dart';
 import '../../../core/constants/constants.dart';
 import '../../../core/constants/firebase_constants.dart';
-import '../../../core/constants/keys.dart';
+
 import '../../../core/providers/firebase_providers.dart';
 import '../../../core/type_defs.dart';
 import '../../../model/user.dart';
-import '../screens/sign_up_screen.dart';
 
 final authRepositoryProvider = Provider(
   (ref) => AuthRepository(
@@ -59,13 +57,12 @@ class AuthRepository {
   Stream<User?> get authStateChange => _auth.authStateChanges();
 
 //Google sign-in
-  FutureEither<UserModel?> signinWithGoogle(BuildContext context) async {
+  FutureEither<UserModel?> signInWithGoogle(BuildContext context) async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
-      final googleAuth = await googleUser?.authentication;
-
-      if (googleAuth != null) {
+      if (googleUser != null) {
+        final googleAuth = await googleUser.authentication;
         final credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
@@ -80,6 +77,7 @@ class AuthRepository {
 
           if (userCredential.additionalUserInfo!.isNewUser) {
             //get the time&date in sri lanka
+            // ignore: use_build_context_synchronously
             String? dateAndTime = await _ref
                 .read(commonGetDateAndTimeControllerProvider.notifier)
                 .getDateAndTime(context);
@@ -88,13 +86,14 @@ class AuthRepository {
               email: userCredential.user!.email ?? '',
               photoUrl:
                   userCredential.user!.photoURL ?? Constants.avatarDefault,
-              address: '',
+              address: [],
               cart: [],
               id: uid,
               name: userCredential.user!.displayName ?? '',
               dateTime: dateAndTime != null
                   ? DateTime.parse(dateAndTime)
                   : DateTime.now(),
+              favorite: [],
             );
 
             //Generate search Keywords
@@ -113,16 +112,16 @@ class AuthRepository {
             //get current user data and return userData to controller
             final user = await getUserData(
               uid: uid,
-            ).first;
+            ).firstWhere((element) => element != null);
             return right(user);
           } else {
             //get current user data and return userData to controller
             final user = await getUserData(
               uid: uid,
-            ).first;
+            ).firstWhere((element) => element != null);
+
             return right(user);
           }
-          ;
         }
       }
 
@@ -160,10 +159,11 @@ class AuthRepository {
                 .getDateAndTime(context);
 
             UserModel userModel = UserModel(
+              favorite: [],
               email: userCredential.user!.email ?? '',
               photoUrl:
                   userCredential.user!.photoURL ?? Constants.avatarDefault,
-              address: '',
+              address: [],
               cart: [],
               id: userCredential.user!.uid,
               name: userCredential.user!.displayName ?? '',
@@ -249,6 +249,7 @@ class AuthRepository {
           Map<String, dynamic> userMap = UserModel.toMap(
               searchKeyword: searchKeyword,
               userModel: UserModel(
+                favorite: [],
                 email: linkedInUser
                     .user.email!.elements![0].handleDeep!.emailAddress!,
                 photoUrl: linkedInUser.user.profilePicture != null
@@ -256,7 +257,7 @@ class AuthRepository {
                         .elements![0].identifiers![0].identifier
                         .toString()
                     : Constants.avatarDefault,
-                address: '',
+                address: [],
                 cart: [],
                 id: uid,
                 name:
@@ -323,9 +324,10 @@ class AuthRepository {
         Map<String, dynamic> userMap = UserModel.toMap(
           searchKeyword: searchKeyword,
           userModel: UserModel(
+            favorite: [],
             id: uid,
             name: name,
-            address: "",
+            address: [],
             email: email,
             photoUrl: "",
             cart: [],
@@ -381,9 +383,42 @@ class AuthRepository {
   }
 
   //get user data
-  Stream<UserModel> getUserData({required String uid}) {
-    return _users.doc(uid).snapshots().map((event) {
-      return UserModel.fromMap(event.data() as Map<String, dynamic>);
+  Stream<UserModel?> getUserData({required String uid}) {
+    final res = _users.doc(uid).snapshots().map((event) {
+      final res = event.data();
+      if (res != null) {
+        return UserModel.fromMap(res as Map<String, dynamic>);
+      }
     });
+
+    return res;
+  }
+
+  //logOut
+  FutureVoid signOut() async {
+    try {
+      final res = _auth.currentUser!.providerData;
+
+      for (var element in res) {
+        switch (element.providerId) {
+          case 'google.com':
+            _googleSignIn.signOut();
+            _auth.signOut();
+            break;
+          case 'facebook.com':
+            _googleSignIn.signOut();
+            _auth.signOut();
+            break;
+          default:
+            _auth.signOut();
+        }
+      }
+
+      return right(null);
+    } on FirebaseException catch (e) {
+      throw e.message!;
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
   }
 }

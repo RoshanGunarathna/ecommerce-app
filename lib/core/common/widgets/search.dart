@@ -58,23 +58,17 @@ class _SearchState extends State<Search> {
 
   @override
   Widget build(BuildContext context) {
-    bool shouldIGotoSearchScreen = true;
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: Container(
-            height: 42,
-            margin: const EdgeInsets.only(left: 10),
+          child: SizedBox(
+            height: 48,
             child: Stack(
-              alignment: Alignment.centerRight,
               children: [
                 TextFormField(
                   onChanged: (value) {
-                    if (shouldIGotoSearchScreen) {
-                      navigateToSearchScreen(context);
-                    }
+                    navigateToSearchScreen(context);
                   },
                   controller: widget.searchController,
                   cursorColor: blackColor,
@@ -107,51 +101,56 @@ class _SearchState extends State<Search> {
                   ),
                 ),
                 _isVoiceSupport
-                    ? AvatarGlow(
-                        glowColor: primaryColor,
-                        repeat: true,
-                        repeatPauseDuration: const Duration(milliseconds: 100),
-                        showTwoGlows: true,
-                        endRadius: 20.0,
-                        animate: _isListening,
-                        duration: const Duration(milliseconds: 2000),
-                        child: GestureDetector(
-                          onTapDown: (details) async {
-                            if (!_isListening) {
-                              setState(() {
-                                _text = "Hold the button and speak..";
-                                _isListening = true;
-                              });
-                              var available = await _speechToText.initialize();
-                              if (available) {
+                    ? Align(
+                        alignment: Alignment.centerRight,
+                        child: AvatarGlow(
+                          glowColor: primaryColor,
+                          repeat: true,
+                          repeatPauseDuration:
+                              const Duration(milliseconds: 100),
+                          showTwoGlows: true,
+                          endRadius: 20.0,
+                          animate: _isListening,
+                          duration: const Duration(milliseconds: 2000),
+                          child: GestureDetector(
+                            onTapDown: (details) async {
+                              if (!_isListening) {
                                 setState(() {
-                                  _speechToText.listen(
-                                    onResult: (result) {
-                                      setState(() {
-                                        _text = result.recognizedWords;
-                                        widget.searchController.text =
-                                            result.recognizedWords;
-                                      });
-                                    },
-                                  );
+                                  _text = "Hold the button and speak..";
+                                  _isListening = true;
                                 });
+                                var available =
+                                    await _speechToText.initialize();
+                                if (available) {
+                                  setState(() {
+                                    _speechToText.listen(
+                                      onResult: (result) {
+                                        setState(() {
+                                          _text = result.recognizedWords;
+                                          widget.searchController.text =
+                                              result.recognizedWords;
+                                        });
+                                      },
+                                    );
+                                  });
+                                }
                               }
-                            }
-                          },
-                          onTapUp: (details) async {
-                            _speechToText.stop();
+                            },
+                            onTapUp: (details) async {
+                              _speechToText.stop();
 
-                            setState(() {
-                              _isListening = false;
-                            });
+                              setState(() {
+                                _isListening = false;
+                              });
 
-                            if (_text != "Hold the button and speak..") {
-                              navigateToSearchScreen(context);
-                            }
-                          },
-                          child: Icon(
-                            _isListening ? Icons.mic : Icons.mic_none,
-                            color: blackColor,
+                              if (_text != "Hold the button and speak..") {
+                                navigateToSearchScreen(context);
+                              }
+                            },
+                            child: Icon(
+                              _isListening ? Icons.mic : Icons.mic_none,
+                              color: blackColor,
+                            ),
                           ),
                         ),
                       )
@@ -168,26 +167,28 @@ class _SearchState extends State<Search> {
               final userCartLength = ref.watch(cartProvider).length;
 
               return userCartLength != 0
-                  ? Badges.Badge(
-                      badgeContent: Text(userCartLength.toString()),
-                      badgeStyle:
-                          const Badges.BadgeStyle(badgeColor: whiteColor),
-                      child: Container(
-                        height: 42,
-                        margin: const EdgeInsets.symmetric(horizontal: 10),
-                        child: const Icon(
-                          Icons.shopping_cart_outlined,
-                          color: primaryColor,
-                          size: 30,
+                  ? Padding(
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      child: Badges.Badge(
+                        badgeContent: Text(userCartLength.toString()),
+                        badgeStyle:
+                            const Badges.BadgeStyle(badgeColor: whiteColor),
+                        child: const SizedBox(
+                          height: 42,
+                          child: Icon(
+                            Icons.shopping_cart_outlined,
+                            color: primaryColor,
+                            size: 30,
+                          ),
                         ),
                       ),
                     )
                   : Container(
                       height: 42,
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      margin: const EdgeInsets.only(left: 10, right: 10),
                       child: const Icon(
                         Icons.shopping_cart_outlined,
-                        color: primaryColor,
+                        color: blackColorShade1,
                         size: 30,
                       ),
                     );

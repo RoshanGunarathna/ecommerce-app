@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../model/product.dart';
@@ -14,7 +13,7 @@ final searchControllerProvider = StateNotifierProvider<SearchController, bool>(
 );
 
 //streamProvider
-final searchProviderStream = StreamProvider<List<ProductModel?>>(
+final searchProviderStream = StreamProvider.autoDispose<List<ProductModel?>>(
   (ref) {
     final _searchController = ref.watch(searchControllerProvider.notifier);
     return _searchController.getSearchData();

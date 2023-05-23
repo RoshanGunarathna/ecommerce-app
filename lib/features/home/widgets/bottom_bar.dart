@@ -28,6 +28,35 @@ class _BottomBarState extends State<BottomBar> {
     const AccountScreen(),
   ];
 
+  // List<Widget> pages = [
+  //   const Scaffold(
+  //     body: Center(child: Text("Page 0")),
+  //   ),
+  //   const Scaffold(
+  //     body: Center(child: Text("Page 1")),
+  //   ),
+  //   const Scaffold(
+  //     body: Center(child: Text("Page 2")),
+  //   ),
+  //   const Scaffold(
+  //     body: Center(child: Text("Page 3")),
+  //   ),
+  //   Scaffold(
+  //     body: Center(
+  //       child: Consumer(
+  //         builder: (BuildContext context, WidgetRef ref, child) =>
+  //             ElevatedButton(
+  //                 onPressed: () {
+  //                   ref
+  //                       .read(accountControllerProvider.notifier)
+  //                       .logOut(context);
+  //                 },
+  //                 child: const Text("SignOut")),
+  //       ),
+  //     ),
+  //   ),
+  // ];
+
   void updatePage(int page) {
     setState(() {
       _page = page;
@@ -48,7 +77,7 @@ class _BottomBarState extends State<BottomBar> {
           onTap: updatePage,
           items: [
             BottomNavigationBarItem(
-              icon: Container(
+              icon: SizedBox(
                 width: bottomBarWidth,
                 child: Icon(
                   Icons.home_outlined,
@@ -58,7 +87,7 @@ class _BottomBarState extends State<BottomBar> {
               label: '',
             ),
             BottomNavigationBarItem(
-              icon: Container(
+              icon: SizedBox(
                 width: bottomBarWidth,
                 child: Icon(
                   Icons.category_outlined,
@@ -68,7 +97,7 @@ class _BottomBarState extends State<BottomBar> {
               label: '',
             ),
             BottomNavigationBarItem(
-              icon: Container(
+              icon: SizedBox(
                 width: bottomBarWidth,
                 child: Icon(
                   Icons.favorite_outline_rounded,
@@ -78,7 +107,7 @@ class _BottomBarState extends State<BottomBar> {
               label: '',
             ),
             BottomNavigationBarItem(
-              icon: Container(
+              icon: SizedBox(
                 width: bottomBarWidth,
                 child: Icon(
                   Icons.notifications_none_rounded,
@@ -88,7 +117,7 @@ class _BottomBarState extends State<BottomBar> {
               label: '',
             ),
             BottomNavigationBarItem(
-              icon: Container(
+              icon: SizedBox(
                 width: bottomBarWidth,
                 child: Icon(
                   Icons.person_outline_rounded,

@@ -3,13 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils.dart';
 import '../../../model/product.dart';
-import '../../../model/user.dart';
 
 import '../../auth/controller/auth_controller.dart';
 import '../repository/favorite_repository.dart';
 
 //user provider
-final favoriteProvider = StateProvider<List<ProductModel>?>((ref) => null);
+final favoriteProvider = StateProvider<List<ProductModel>>((ref) => []);
 
 //favoriteControllerProvider
 final favoriteControllerProvider =
@@ -69,27 +68,11 @@ class FavoriteController extends StateNotifier<bool> {
       showSnackBar(context: context, text: l.message);
     }, (favoriteList) {
       returnValue = favoriteList;
-      _ref.read(favoriteProvider.notifier).update((state) => favoriteList);
+      _ref
+          .read(favoriteProvider.notifier)
+          .update((state) => favoriteList ?? []);
     });
 
-    return returnValue;
-  }
-
-  //get User data
-
-  Future<UserModel?> getUserData({
-    required BuildContext context,
-  }) async {
-    UserModel? returnValue;
-    state = true;
-    final res =
-        await _favoriteRepository.getUserData(uid: _ref.read(userProvider)!.id);
-    state = false;
-    res.fold((l) {
-      showSnackBar(context: context, text: l.message);
-    }, (user) {
-      returnValue = user;
-    });
     return returnValue;
   }
 
@@ -122,6 +105,6 @@ class FavoriteController extends StateNotifier<bool> {
         .getFavoriteProductData(context)
         .then((favoriteProductList) => _ref
             .read(favoriteProvider.notifier)
-            .update((state) => favoriteProductList));
+            .update((state) => favoriteProductList ?? []));
   }
 }

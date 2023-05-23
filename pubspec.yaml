@@ -1,6 +1,5 @@
 name: ecommerce_app
 description: A new Flutter project.
-
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -20,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.18.6 <3.0.0'
+  sdk: '>=3.0.1 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -37,15 +36,15 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   firebase_core: ^2.4.1
-  flutter_svg: ^1.1.6
+  flutter_svg: ^2.0.6
   firebase_storage: ^11.0.10
   cloud_firestore: ^4.3.1
   firebase_auth: ^4.2.5
   flutter_riverpod: ^2.1.3
   
-  google_sign_in: ^5.4.3
+  google_sign_in: ^6.1.0
   pinput: ^2.2.23
-  fpdart: ^0.4.0
+  fpdart: ^0.6.0
   flutter_facebook_auth: ^5.0.7
   
   introduction_screen: ^3.1.6
@@ -54,23 +53,32 @@ dependencies:
   flutter_login_facebook: ^1.7.0
   
   linkedin_login: ^2.2.1
-  intl: ^0.17.0
-  flutter_rating: ^0.0.2
+  intl: ^0.18.0
   flutter_rating_bar: ^4.0.1
   speech_to_text: ^6.1.1
   avatar_glow: ^2.0.2
   just_audio: ^0.9.32
   badges: ^3.1.1
   roundcheckbox: ^2.0.5
-  
-
-
-
-  
+  pay: ^1.1.0
+  uuid: ^3.0.7
+  riverpod_annotation: ^2.1.1
+  device_preview: ^1.1.0
+  http: ^0.13.6
+  flutter_stripe: ^9.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner: ^2.3.3
+  custom_lint: ^0.4.0
+  riverpod_lint: ^1.3.1
+  riverpod_generator: ^2.2.1
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path: "assets/logos/logo.png"
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -94,7 +102,6 @@ flutter:
   assets:
     - assets/logos/
     - assets/images/
- 
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

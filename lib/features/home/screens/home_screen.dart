@@ -1,5 +1,3 @@
-import 'package:ecommerce_app/features/auth/controller/auth_controller.dart';
-import 'package:ecommerce_app/model/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,10 +11,6 @@ import '../controller/home_controller.dart';
 import '../widgets/carouselFutureBuilder.dart';
 import '../widgets/productFutureBuilder.dart';
 
-final currentTimeProvider = StreamProvider.autoDispose<DateTime>((ref) {
-  return Stream.periodic(const Duration(seconds: 1), (_) => DateTime.now());
-});
-
 class HomeScreen extends ConsumerStatefulWidget {
   static const routeName = '/home';
   const HomeScreen({super.key});
@@ -26,13 +20,13 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
-  late TextEditingController _searchController;
+  final TextEditingController _searchController = TextEditingController();
 
   //for category part
   List<CategoryModel> _categoryList = [];
 
   final List<Widget> _pageList = [
-    const ProductStramBuilder(),
+    const ProductFutureBuilder(),
   ];
 
   void refreshCategoryList() async {
@@ -44,65 +38,47 @@ class _HomeScreenConsumerState extends ConsumerState<HomeScreen> {
       _categoryList = await ref.read(categoryProvider)!;
 
       _pageList.addAll(_categoryList
-          .map((e) => ProductStramBuilder(
+          .map((e) => ProductFutureBuilder(
                 category: e.name,
               ))
           .toList());
+      setState(() {
+        _pageList;
+      });
     }
-    refresh();
-  }
-
-  void refresh() {
-    setState(() {});
   }
 
   @override
   void initState() {
-    _searchController = TextEditingController();
     SchedulerBinding.instance.addPostFrameCallback((_) {
       refreshCategoryList();
     });
-    // TODO: implement initState
+    //TODO: implement initState
     super.initState();
   }
 
   @override
-  void dispose() {
-    super.dispose();
-    _searchController.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final userData = ref.watch(userProvider);
-    final UserModel user = userData ??
-        UserModel(
-            id: '-',
-            name: 'guest',
-            address: '',
-            email: '',
-            photoUrl: "",
-            cart: []);
-
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 70,
         automaticallyImplyLeading: false,
         elevation: 0,
         title: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(top: 10, bottom: 5),
           child: Search(searchController: _searchController),
         ),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(15.0),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Column(
             children: [
               const CarouselFutureBuilder(),
               const SizedBox(
                 height: 10,
               ),
-              _pageList.length > 1
+              _pageList.length > 0
                   ? Column(children: _pageList)
                   : const SizedBox(),
               const SizedBox(

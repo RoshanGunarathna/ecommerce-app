@@ -31,7 +31,7 @@ class CartRepository {
   //add Product To cart Product List
   FutureEither<bool> addToCart(String uid, ProductModel product) async {
     try {
-      List<ProductModel>? cartProductList = [];
+      List<ProductModel> cartProductList = [];
       UserModel? userModel;
 
       final res = await getUserData(uid: uid);
@@ -41,7 +41,15 @@ class CartRepository {
       });
 
       if (userModel != null) {
-        cartProductList!.add(product);
+        if (cartProductList.isNotEmpty) {
+          for (var element in cartProductList) {
+            if (element.id == product.id) {
+              throw ("Already have in cart!");
+            }
+          }
+        }
+
+        cartProductList.add(product);
 
         final UserModel user = userModel!.copyWith(cart: cartProductList);
 

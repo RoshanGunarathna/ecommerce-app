@@ -12,18 +12,23 @@ class CarouselImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return CarouselSlider(
       items: discountedProductList.map((product) {
-        return Container(
-          width: double.infinity,
-          height: 200,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: NetworkImage(
-                product.images[0],
+        return Stack(
+          children: [
+            Container(
+              width: double.infinity,
+              height: 200,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  alignment: Alignment.centerLeft,
+                  image: NetworkImage(
+                    product.images[0],
+                  ),
+                  fit: BoxFit.fitHeight,
+                ),
               ),
-              fit: BoxFit.contain,
+              child: Offer(product: product),
             ),
-          ),
-          child: Offer(product: product),
+          ],
         );
       }).toList(),
       options: CarouselOptions(viewportFraction: 1, height: 160),

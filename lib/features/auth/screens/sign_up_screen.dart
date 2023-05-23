@@ -143,12 +143,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     iconPath: googlePath,
                     label: '',
                     socialButtonType: SocialButtonType.google),
-                SizedBox(width: 10),
-                SocialButton(
-                    ctx: context,
-                    iconPath: linkedInPath,
-                    label: '',
-                    socialButtonType: SocialButtonType.linkedIn),
+                // SizedBox(width: 10),
+                // SocialButton(
+                //     ctx: context,
+                //     iconPath: linkedInPath,
+                //     label: '',
+                //     socialButtonType: SocialButtonType.linkedIn),
               ],
             ),
             const SizedBox(height: 15),

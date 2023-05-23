@@ -4,12 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:roundcheckbox/roundcheckbox.dart';
 
 import '../../../core/palette.dart';
-import '../../../model/product.dart';
+import '../../../model/cart_selected_product_model.dart';
+
 import '../controller/cart_controller.dart';
 import '../providers/cart_selected_item_provider.dart';
 
 class ProductCard extends ConsumerStatefulWidget {
-  final ProductModel product;
+  final CartSelectedProductModel product;
 
   const ProductCard({
     Key? key,
@@ -21,7 +22,13 @@ class ProductCard extends ConsumerStatefulWidget {
 }
 
 class _ProductCardConsumerState extends ConsumerState<ProductCard> {
-  bool _isCheckButtonPressed = true;
+  bool _isCheckButtonPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isCheckButtonPressed = widget.product.isSelected;
+  }
 
   void onPressedDelete() {
     ref.read(cartSelectedItemProvider.notifier).update((state) {
@@ -35,21 +42,20 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
         productID: widget.product.id, context: context);
   }
 
-  void removeAProductFromTheSelectedProductCart(ProductModel product) {
+  void removeAProductFromTheSelectedProductCart(
+      CartSelectedProductModel product) {
     ref.read(cartSelectedItemProvider.notifier).update((state) {
-      for (var i = 0; i < state!.length; i++) {
-        if (state[i].id == product.id) {
-          state.removeAt(i);
-          break;
-        }
-      }
+      state!.removeWhere((element) => element.id == product.id);
       return state;
     });
   }
 
-  void addAProductFromTheSelectedProductCart(ProductModel product) {
+  void addAProductToTheSelectedProductCart(CartSelectedProductModel product) {
+    print(product.selectedQuantity);
     ref.read(cartSelectedItemProvider.notifier).update((state) {
-      state!.add(product);
+      state!.removeWhere((element) => element.id == product.id);
+
+      state.add(product);
 
       return state;
     });
@@ -57,59 +63,76 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
 
   void selectionButtonPressed() {
     _isCheckButtonPressed
-        ? addAProductFromTheSelectedProductCart(widget.product)
+        ? addAProductToTheSelectedProductCart(widget.product)
         : ref.read(cartSelectedItemProvider.notifier).update((state) {
             if (state != null && state.isNotEmpty) {
               state.removeWhere((product) => product.id == widget.product.id);
             }
+
             return state;
           });
   }
 
-  void increaseQuantityButtonsPressed() {
-    int lengthOfThisProduct = 0;
+  //get updated current product
+  CartSelectedProductModel getUpdatedProduct(String productID) {
     final selectedProductList = ref.read(cartSelectedItemProvider);
-    if (selectedProductList != null && selectedProductList.isNotEmpty) {
-      //get ids
-      final List<String> productIds = [];
-      for (var element in selectedProductList) {
-        productIds.add(element.id);
-      }
+    return selectedProductList!
+        .firstWhere((element) => element.id == productID);
+  }
 
-      //remove selected product
-      productIds.removeWhere((productId) => productId != widget.product.id);
+  void increaseQuantityButtonsPressed() {
+    // int lengthOfThisProduct = 0;
+    // final selectedProductList = ref.read(cartSelectedItemProvider);
+    // if (selectedProductList != null && selectedProductList.isNotEmpty) {
+    //   //get ids
+    //   final List<String> productIds = [];
+    //   for (var element in selectedProductList) {
+    //     productIds.add(element.id);
+    //   }
 
-      //get length of other product list
-      lengthOfThisProduct = productIds.length;
-    }
+    //   //remove selected product
+    //   productIds.removeWhere((productId) => productId != widget.product.id);
+
+    //   //get length of other product list
+    //   lengthOfThisProduct = productIds.length;
+    // }
+
+    final currentProduct = getUpdatedProduct(widget.product.id);
 
     if (_isCheckButtonPressed &&
-        widget.product.quantity > lengthOfThisProduct) {
-      addAProductFromTheSelectedProductCart(widget.product);
+        widget.product.quantity > currentProduct.selectedQuantity) {
+      addAProductToTheSelectedProductCart(widget.product
+          .copyWith(selectedQuantity: currentProduct.selectedQuantity + 1));
     }
   }
 
   void decreaseQuantityButtonsPressed() {
-    int? lengthOfOtherProduct;
-    final selectedProductList = ref.read(cartSelectedItemProvider);
-    if (selectedProductList != null && selectedProductList.isNotEmpty) {
-      //get ids
-      final List<String> productIds = [];
-      for (var element in selectedProductList) {
-        productIds.add(element.id);
-      }
+    // int? lengthOfOtherProduct;
+    final currentProduct = getUpdatedProduct(widget.product.id);
 
-      //remove selected product
-      productIds.removeWhere((productId) => productId == widget.product.id);
+    // if (selectedProductList != null && selectedProductList.isNotEmpty) {
+    //   //get ids
+    //   final List<String> productIds = [];
+    //   for (var element in selectedProductList) {
+    //     productIds.add(element.id);
+    //   }
 
-      //get length of other product list
-      lengthOfOtherProduct = productIds.length;
-    }
+    //   //remove selected product
+    //   productIds.removeWhere((productId) => productId == widget.product.id);
+
+    //   //get length of other product list
+    //   lengthOfOtherProduct = productIds.length;
+    // }
+
+    // if (_isCheckButtonPressed &&
+    // lengthOfOtherProduct != null &&
+    // selectedProductList!.length > lengthOfOtherProduct + 1) {
 
     if (_isCheckButtonPressed &&
-        lengthOfOtherProduct != null &&
-        selectedProductList!.length > lengthOfOtherProduct + 1) {
-      removeAProductFromTheSelectedProductCart(widget.product);
+        widget.product.selectedQuantity != currentProduct.selectedQuantity) {
+      print("this method is running");
+      addAProductToTheSelectedProductCart(widget.product
+          .copyWith(selectedQuantity: currentProduct.selectedQuantity - 1));
     } else if (_isCheckButtonPressed) {
       _isCheckButtonPressed = false;
       removeAProductFromTheSelectedProductCart(widget.product);
@@ -121,12 +144,17 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
     const unselectedColor = grayColor;
     final selectedProductList = ref.watch(cartSelectedItemProvider);
 
-    double kg = widget.product.kg ?? 1;
+    double? kg =
+        widget.product.kg ?? widget.product.selectedQuantity.toDouble();
     if (selectedProductList != null && selectedProductList.isNotEmpty) {
-      if (selectedProductList.isEmpty) {
-        _isCheckButtonPressed = false;
-      }
-      List<ProductModel> selectedQuantity = [];
+      List<CartSelectedProductModel> selectedQuantity = [];
+      selectedProductList.forEach((element) {
+        if (element.id == widget.product.id) {
+          _isCheckButtonPressed = true;
+          final getCurrentUpdatedProduct = getUpdatedProduct(widget.product.id);
+          kg = kg! * getCurrentUpdatedProduct.selectedQuantity.toDouble();
+        }
+      });
 
       for (var e in selectedProductList) {
         if (e.id == widget.product.id) {
@@ -185,7 +213,7 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
                       height: 10,
                     ),
                     Text(
-                      '\$ ${widget.product.price}',
+                      '\$ ${widget.product.price.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 15,
                         color: _isCheckButtonPressed
@@ -199,7 +227,12 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
                     Row(
                       children: [
                         InkWell(
-                          onTap: increaseQuantityButtonsPressed,
+                          onTap: () {
+                            if (selectedProductList != null &&
+                                _isCheckButtonPressed != false) {
+                              increaseQuantityButtonsPressed();
+                            }
+                          },
                           child: Container(
                             alignment: Alignment.center,
                             height: 25,
@@ -230,7 +263,9 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
                             borderRadius: BorderRadius.circular(5),
                           ),
                           child: Text(
-                            "$kg kg",
+                            widget.product.kg != null
+                                ? "${kg!.toStringAsFixed(2)} kg"
+                                : "${kg!.round()}",
                             style: TextStyle(
                               fontSize: 10,
                               color: _isCheckButtonPressed
@@ -243,7 +278,12 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
                           width: 5,
                         ),
                         InkWell(
-                          onTap: decreaseQuantityButtonsPressed,
+                          onTap: () {
+                            if (selectedProductList != null &&
+                                _isCheckButtonPressed != false) {
+                              decreaseQuantityButtonsPressed();
+                            }
+                          },
                           child: Container(
                             alignment: Alignment.center,
                             height: 25,
@@ -318,9 +358,11 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
                       ),
                     ),
                     onTap: (tap) {
-                      _isCheckButtonPressed = tap ?? true;
+                      if (selectedProductList != null) {
+                        _isCheckButtonPressed = tap ?? true;
 
-                      selectionButtonPressed();
+                        selectionButtonPressed();
+                      }
                     },
                   ),
                 ),

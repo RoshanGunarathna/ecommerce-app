@@ -10,7 +10,7 @@ import '../../../model/category_model.dart';
 import '../../home/widgets/bottom_bar.dart';
 
 import '../controller/category_controller.dart';
-import '../widgets/productStreamBuilder.dart';
+import '../widgets/product_future_builder.dart';
 
 class CategoryScreen extends ConsumerStatefulWidget {
   const CategoryScreen({super.key});
@@ -31,7 +31,10 @@ class _CategoryScreenConsumerState extends ConsumerState<CategoryScreen> {
   List<CategoryModel> _categoryList = [];
   List<String> _categoryListNameStrings = ["All"];
   List<Widget> _pageList = [
-    ProductStramBuilder(),
+    const Padding(
+      padding: EdgeInsets.only(top: 8),
+      child: ProductFutureBuilder(),
+    ),
   ];
 
   void refreshCategoryList() async {
@@ -46,7 +49,7 @@ class _CategoryScreenConsumerState extends ConsumerState<CategoryScreen> {
         _categoryListNameStrings
             .addAll(_categoryList.map((e) => e.name).toList());
         _pageList.addAll(_categoryList
-            .map((e) => ProductStramBuilder(
+            .map((e) => ProductFutureBuilder(
                   categoryName: e.name,
                 ))
             .toList());
@@ -93,23 +96,30 @@ class _CategoryScreenConsumerState extends ConsumerState<CategoryScreen> {
               ),
               elevation: 0,
             ),
-            Search(searchController: _searchController),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Search(searchController: _searchController),
+            ),
           ],
         ),
       ),
       body: _categoryListNameStrings.length > 1
-          ? TitleScrollNavigation(
-              identiferStyle: const NavigationIdentiferStyle(
-                  color: blackColor, position: IdentifierPosition.topAndRight),
-              showIdentifier: true,
-              barStyle: const TitleNavigationBarStyle(
-                  style: TextStyle(fontSize: 15),
-                  elevation: 0,
-                  activeColor: blackColor,
-                  padding: EdgeInsets.all(3),
-                  spaceBetween: 30),
-              titles: _categoryListNameStrings,
-              pages: _pageList,
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: TitleScrollNavigation(
+                identiferStyle: const NavigationIdentiferStyle(
+                    color: blackColor,
+                    position: IdentifierPosition.topAndRight),
+                showIdentifier: true,
+                barStyle: const TitleNavigationBarStyle(
+                    style: TextStyle(fontSize: 15),
+                    elevation: 0,
+                    activeColor: blackColor,
+                    padding: EdgeInsets.all(3),
+                    spaceBetween: 30),
+                titles: _categoryListNameStrings,
+                pages: _pageList,
+              ),
             )
           : const SizedBox(),
     );

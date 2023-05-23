@@ -1,12 +1,14 @@
-import 'package:ecommerce_app/features/account/controller/account_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/constants.dart';
 import '../../../core/palette.dart';
+import '../../address/screens/address_screen.dart';
 import '../../auth/controller/auth_controller.dart';
 import '../../home/widgets/bottom_bar.dart';
-import '../services/user_services.dart';
+import '../../privacyPolicy/screens/privacy_policy_scree.dart';
+import '../controller/account_controller.dart';
+import '../widget/logOut_confirmation.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -19,6 +21,20 @@ class AccountScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
+
+    //navigation
+    void navigateToAddressScreen() {
+      Navigator.pushNamed(context, AddressScreen.routeName);
+    }
+
+    void navigateToPrivacyPolicyScreen() {
+      Navigator.pushNamed(context, PrivacyPolicy.routeName);
+    }
+
+    //logOut
+    void logOut() {
+      ref.read(accountControllerProvider.notifier).logOut(context);
+    }
 
     return Scaffold(
         appBar: AppBar(
@@ -84,6 +100,7 @@ class AccountScreen extends ConsumerWidget {
                     color: blackColorShade2,
                   ),
                   child: ListTile(
+                    onTap: navigateToAddressScreen,
                     minLeadingWidth: 50,
                     leading: IconButton(
                       padding: const EdgeInsets.all(0.0),
@@ -148,38 +165,7 @@ class AccountScreen extends ConsumerWidget {
                     color: blackColorShade2,
                   ),
                   child: ListTile(
-                    minLeadingWidth: 50,
-                    leading: IconButton(
-                      padding: const EdgeInsets.all(0.0),
-                      onPressed: () {},
-                      icon: const SizedBox(
-                        height: 30,
-                        width: 30,
-                        child: Icon(
-                          Icons.language_rounded,
-                          color: primaryColor,
-                          size: 30,
-                        ),
-                      ),
-                    ),
-                    title: const Text(
-                      "Languages",
-                      style: TextStyle(color: blackColorShade1, fontSize: 15),
-                    ),
-                    trailing: IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.arrow_forward_ios_rounded)),
-                  ),
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: blackColorShade2,
-                  ),
-                  child: ListTile(
+                    onTap: navigateToPrivacyPolicyScreen,
                     minLeadingWidth: 50,
                     leading: IconButton(
                       padding: const EdgeInsets.all(0.0),
@@ -270,20 +256,26 @@ class AccountScreen extends ConsumerWidget {
                 const SizedBox(
                   height: 30,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(
-                      Icons.logout_outlined,
-                      size: 25,
-                    ),
-                    Text(
-                      "Log out",
-                      style: TextStyle(
-                        fontSize: 20,
+                InkWell(
+                  onTap: () => logOutConfirmationDialog(
+                    context: context,
+                    onConfirm: () => logOut(),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(
+                        Icons.logout_outlined,
+                        size: 25,
                       ),
-                    ),
-                  ],
+                      Text(
+                        "Log out",
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                    ],
+                  ),
                 )
               ],
             ),

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/palette.dart';
-import '../../../model/product.dart';
-import '../../payment/screens/payment_screen.dart';
+import '../../../model/cart_selected_product_model.dart';
 
+import '../../home/widgets/bottom_bar.dart';
+import '../../payment/screens/payment_screen.dart';
 import '../controller/cart_controller.dart';
 import '../providers/cart_selected_item_provider.dart';
 import '../widgets/customGridView.dart';
@@ -19,10 +21,22 @@ class CartScreen extends ConsumerStatefulWidget {
 }
 
 class _CartScreenConsumerState extends ConsumerState<CartScreen> {
-  final stickyKey = GlobalKey();
+//navigation
+  void backtoHome() {
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => const BottomBar()));
+  }
 
   void navigateToBack(BuildContext context) {
     Navigator.pop(context);
+  }
+
+  void navigateToPaymentScreen({
+    required double total,
+    required List<CartSelectedProductModel> selectedProductList,
+  }) {
+    Navigator.pushNamed(context, PaymentScreen.routeName,
+        arguments: [total, selectedProductList]);
   }
 
   void refreshCartList() {
@@ -30,9 +44,29 @@ class _CartScreenConsumerState extends ConsumerState<CartScreen> {
   }
 
   void addCartItemToSelectedItemProvider() {
-    ref
-        .read(cartSelectedItemProvider.notifier)
-        .update((state) => state = ref.read(cartProvider));
+    ref.read(cartSelectedItemProvider.notifier).update((state) {
+      final cartList = ref.read(cartProvider);
+      state = cartList.map((cartProduct) {
+        return CartSelectedProductModel(
+            id: cartProduct.id,
+            name: cartProduct.name,
+            description: cartProduct.description,
+            category: cartProduct.category,
+            sellerUserId: cartProduct.sellerUserId,
+            images: cartProduct.images,
+            price: cartProduct.price,
+            quantity: cartProduct.quantity,
+            kg: cartProduct.kg,
+            shippingCategory: cartProduct.shippingCategory,
+            isSelected: true,
+            dateTime: cartProduct.dateTime,
+            discount: cartProduct.discount,
+            rating: cartProduct.rating,
+            selectedQuantity: 1);
+      }).toList();
+
+      return state;
+    });
   }
 
   @override
@@ -46,9 +80,94 @@ class _CartScreenConsumerState extends ConsumerState<CartScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<ProductModel> cartStateProvider = ref.watch(cartProvider);
-    final List<ProductModel>? selectedItem =
+    final size = MediaQuery.of(context).size;
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          leading: IconButton(
+            onPressed: () {
+              navigateToBack(context);
+            },
+            icon: const Icon(
+              Icons.arrow_back_rounded,
+              color: blackColorShade1,
+              size: 35,
+            ),
+          ),
+          title: const Text(
+            "Cart",
+            style: TextStyle(
+              color: blackColorShade1,
+              fontSize: 25,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          elevation: 0,
+          actions: [
+            IconButton(
+              onPressed: backtoHome,
+              icon: Icon(
+                Icons.home_outlined,
+                color: blackColorShade1,
+                size: 30,
+              ),
+            ),
+          ],
+        ),
+        body: ConstrainedBox(
+            constraints:
+                BoxConstraints(maxHeight: size.height, maxWidth: size.width),
+            child: bodyContent(context)),
+      ),
+    );
+  }
+
+  Widget bodyContent(BuildContext context) {
+    Widget returnData = Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          SizedBox(
+            height: 120,
+            width: 120,
+            child: Icon(
+              Icons.mood_bad_rounded,
+              size: 100,
+              color: Color.fromARGB(255, 226, 226, 226),
+            ),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Text('No products'),
+        ],
+      ),
+    );
+
+    final List<CartSelectedProductModel>? cartProducts =
+        ref.watch(cartProvider).map((cartProduct) {
+      return CartSelectedProductModel(
+          id: cartProduct.id,
+          name: cartProduct.name,
+          description: cartProduct.description,
+          category: cartProduct.category,
+          sellerUserId: cartProduct.sellerUserId,
+          images: cartProduct.images,
+          price: cartProduct.price,
+          quantity: cartProduct.quantity,
+          kg: cartProduct.kg,
+          shippingCategory: cartProduct.shippingCategory,
+          isSelected: true,
+          discount: cartProduct.discount,
+          dateTime: cartProduct.dateTime,
+          rating: cartProduct.rating,
+          selectedQuantity: 1);
+    }).toList();
+    ;
+    final List<CartSelectedProductModel>? selectedItem =
         ref.watch(cartSelectedItemProvider);
+
     int selectedItems = 0;
     double subTotal = 0.0;
     int discount = 0;
@@ -58,12 +177,11 @@ class _CartScreenConsumerState extends ConsumerState<CartScreen> {
 
     //calculation
     if (selectedItem != null && selectedItem.isNotEmpty) {
-      //selected item
+      //selected Item
       selectedItems = selectedItem.length;
-
-      for (ProductModel product in selectedItem) {
+      for (CartSelectedProductModel product in selectedItem) {
         //SubTotal
-        subTotal += product.price;
+        subTotal += product.price * product.selectedQuantity;
         if (product.discount != null) {
           discountPrice += product.discount!;
         }
@@ -100,50 +218,34 @@ class _CartScreenConsumerState extends ConsumerState<CartScreen> {
       }
 
       total = subTotal - discountPrice + shippingCost;
+    } else {
+      //selected item
+      selectedItems = 0;
     }
 
-    var fontSize = const TextStyle(fontSize: 15);
-
-    var size = MediaQuery.of(context).size;
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: () {
-            navigateToBack(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back_rounded,
-            color: blackColorShade1,
-            size: 35,
-          ),
-        ),
-        title: const Text(
-          "Cart",
-          style: TextStyle(
-              color: blackColorShade1,
-              fontSize: 25,
-              fontWeight: FontWeight.w500),
-        ),
-        elevation: 0,
-      ),
-      body: cartStateProvider.isNotEmpty
-          ? SingleChildScrollView(
-              physics: const ScrollPhysics(),
-              child: Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Column(
-                  children: [
-                    ConstrainedBox(
-                      constraints: BoxConstraints(maxHeight: size.height * 0.6),
-                      child: CustomGridView(
-                        productList: cartStateProvider,
-                      ),
+    if (cartProducts != null && cartProducts.isNotEmpty) {
+      var fontSize = const TextStyle(fontSize: 15);
+      final int cartItems = cartProducts.length;
+      final size = MediaQuery.of(context).size;
+      returnData = CustomScrollView(
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: size.height * 0.5,
+                    child: CustomGridView(
+                      productList: cartProducts,
                     ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Column(
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Expanded(
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Row(
@@ -172,7 +274,6 @@ class _CartScreenConsumerState extends ConsumerState<CartScreen> {
                               ],
                             ),
                             Column(
-                              key: stickyKey,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
@@ -222,7 +323,7 @@ class _CartScreenConsumerState extends ConsumerState<CartScreen> {
                               style: fontSize,
                             ),
                             Text(
-                              '\$ $total',
+                              '\$ ${total.round()}',
                               style: fontSize,
                             ),
                           ],
@@ -244,14 +345,12 @@ class _CartScreenConsumerState extends ConsumerState<CartScreen> {
                                     ),
                                   ),
                                   onPressed: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (_) =>
-                                                const PaymentScreen()));
+                                    navigateToPaymentScreen(
+                                        total: total,
+                                        selectedProductList: selectedItem!);
                                   },
                                   child: const Text(
-                                    'Pay Now',
+                                    'Checkout',
                                     style: TextStyle(fontSize: 25),
                                   ),
                                 ),
@@ -270,37 +369,22 @@ class _CartScreenConsumerState extends ConsumerState<CartScreen> {
                                   ),
                                   onPressed: () {},
                                   child: const Text(
-                                    'Pay Now',
+                                    'Checkout',
                                     style: TextStyle(fontSize: 25),
                                   ),
                                 ),
                               ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            )
-          : Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  SizedBox(
-                    height: 120,
-                    width: 120,
-                    child: Icon(
-                      Icons.mood_bad_rounded,
-                      size: 100,
-                      color: Color.fromARGB(255, 226, 226, 226),
-                    ),
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text('No products'),
                 ],
               ),
             ),
-    );
+          ),
+        ],
+      );
+    }
+
+    return returnData;
   }
 }

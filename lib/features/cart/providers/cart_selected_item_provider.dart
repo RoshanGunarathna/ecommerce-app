@@ -1,7 +1,7 @@
 //user provider
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../model/product.dart';
+import '../../../model/cart_selected_product_model.dart';
 
 final cartSelectedItemProvider =
-    StateProvider<List<ProductModel>?>((ref) => null);
+    StateProvider<List<CartSelectedProductModel>?>((ref) => []);
