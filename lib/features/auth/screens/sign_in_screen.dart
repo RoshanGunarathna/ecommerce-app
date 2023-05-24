@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/common/custom_button.dart';
 
 import '../../../core/common/custom_text_field.dart';
+import '../../../core/common/widgets/loader.dart';
 import '../../../core/constants/assets_path.dart';
 import '../../../core/enums/enums.dart';
 import '../../../core/palette.dart';
@@ -11,9 +12,11 @@ import '../../home/screens/home_screen.dart';
 import '../controller/auth_controller.dart';
 import '../widgets/social_button.dart';
 import 'sign_up_screen.dart';
+import 'dart:ui' as ui;
 
 class SignInScreen extends ConsumerStatefulWidget {
-  const SignInScreen({super.key});
+  final String emailControllerText;
+  const SignInScreen({super.key, this.emailControllerText = ""});
 
   @override
   ConsumerState<SignInScreen> createState() => _SignInScreenConsumerState();
@@ -22,8 +25,19 @@ class SignInScreen extends ConsumerStatefulWidget {
 class _SignInScreenConsumerState extends ConsumerState<SignInScreen> {
   bool isChecked = false;
 
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+
+  @override
+  void initState() {
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+
+    if (widget.emailControllerText.isNotEmpty) {
+      _emailController.text = widget.emailControllerText;
+    }
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -32,9 +46,23 @@ class _SignInScreenConsumerState extends ConsumerState<SignInScreen> {
     super.dispose();
   }
 
+//navigation
   void routeToHomeScreen(BuildContext context) {
     Navigator.pushNamedAndRemoveUntil(
         context, HomeScreen.routeName, (route) => false);
+  }
+
+//navigation
+  void navigateToSignUpScreen({
+    required BuildContext context,
+    required String emailControllerText,
+  }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SignUpScreen(emailControllerText: emailControllerText),
+      ),
+    );
   }
 
   //call to sign-in function in the controller
@@ -50,135 +78,156 @@ class _SignInScreenConsumerState extends ConsumerState<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool _isLoading = ref.watch(authControllerProvider);
     return Scaffold(
-        body: Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Column(
+      body: Stack(
         children: [
-          //Logo
-          Image.asset(logoPath, height: 260),
-          const SizedBox(height: 15),
-          //Email
-          Column(
-            children: [
-              Row(
-                children: const [
-                  Icon(Icons.email_outlined),
-                  SizedBox(width: 10),
-                  Text("Your Email")
-                ],
-              ),
-              const SizedBox(height: 4),
-              CustomTextField(controller: _emailController, hintText: "Email")
-            ],
-          ),
-          const SizedBox(height: 15),
-          //Password
-          Column(
-            children: [
-              Row(
-                children: const [
-                  Icon(Icons.lock_outline),
-                  SizedBox(width: 10),
-                  Text("Password")
-                ],
-              ),
-              const SizedBox(height: 4),
-              CustomTextField(
-                  controller: _passwordController, hintText: "password")
-            ],
-          ),
-          const SizedBox(height: 25),
-          Row(
-            children: [
-              Checkbox(
-                checkColor: Colors.white,
-                value: isChecked,
-                onChanged: (bool? value) {
-                  setState(() {
-                    isChecked = value!;
-                  });
-                },
-              ),
-              const SizedBox(width: 2),
-              const Text("Remember me"),
-              const Spacer(),
-              TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    "Foget Password?",
-                    style: TextStyle(color: textColor),
-                  ))
-            ],
-          ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              children: [
+                //Logo
+                Image.asset(logoPath, height: 260),
+                const SizedBox(height: 15),
+                //Email
+                Column(
+                  children: [
+                    Row(
+                      children: const [
+                        Icon(Icons.email_outlined),
+                        SizedBox(width: 10),
+                        Text("Your Email")
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    CustomTextField(
+                        controller: _emailController, hintText: "Email")
+                  ],
+                ),
+                const SizedBox(height: 15),
+                //Password
+                Column(
+                  children: [
+                    Row(
+                      children: const [
+                        Icon(Icons.lock_outline),
+                        SizedBox(width: 10),
+                        Text("Password")
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    CustomTextField(
+                        controller: _passwordController, hintText: "password")
+                  ],
+                ),
+                const SizedBox(height: 25),
+                Row(
+                  children: [
+                    Checkbox(
+                      checkColor: Colors.white,
+                      value: isChecked,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          isChecked = value!;
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 2),
+                    const Text("Remember me"),
+                    const Spacer(),
+                    TextButton(
+                        onPressed: () {},
+                        child: const Text(
+                          "Foget Password?",
+                          style: TextStyle(color: textColor),
+                        ))
+                  ],
+                ),
 
-          //sign up button
-          SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: CustomButton(
-              text: "Sign In",
-              onPressed: () {
-                signIn();
-              },
+                //sign up button
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: CustomButton(
+                    text: "Sign In",
+                    onPressed: () {
+                      signIn();
+                    },
+                  ),
+                ),
+                const SizedBox(height: 15),
+                // or continue with F G L
+                Row(
+                  children: const [
+                    // Divider(color: Text_color),
+                    Text("  Or Continue With  "),
+                    // Divider(color: Text_color),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                // Icon Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(width: 10),
+                    SocialButton(
+                        ctx: context,
+                        iconPath: facebookPath,
+                        label: '',
+                        socialButtonType: SocialButtonType.facebook),
+                    SizedBox(width: 10),
+                    SocialButton(
+                        ctx: context,
+                        iconPath: googlePath,
+                        label: '',
+                        socialButtonType: SocialButtonType.google),
+                    // SizedBox(width: 10),
+                    // SocialButton(
+                    //     ctx: context,
+                    //     iconPath: linkedInPath,
+                    //     label: '',
+                    //     socialButtonType: SocialButtonType.linkedIn),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                // Text + text button (Already a user ? sign in)
+                // const Spacer(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Are You a new user?"),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    TextButton(
+                        onPressed: () {
+                          navigateToSignUpScreen(
+                              context: context,
+                              emailControllerText: _emailController.text);
+                        },
+                        child: const Text("Sign up"))
+                  ],
+                ),
+                const SizedBox(height: 5)
+              ],
             ),
           ),
-          const SizedBox(height: 15),
-          // or continue with F G L
-          Row(
-            children: const [
-              // Divider(color: Text_color),
-              Text("  Or Continue With  "),
-              // Divider(color: Text_color),
-            ],
-          ),
-          const SizedBox(height: 20),
-          // Icon Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(width: 10),
-              SocialButton(
-                  ctx: context,
-                  iconPath: facebookPath,
-                  label: '',
-                  socialButtonType: SocialButtonType.facebook),
-              SizedBox(width: 10),
-              SocialButton(
-                  ctx: context,
-                  iconPath: googlePath,
-                  label: '',
-                  socialButtonType: SocialButtonType.google),
-              // SizedBox(width: 10),
-              // SocialButton(
-              //     ctx: context,
-              //     iconPath: linkedInPath,
-              //     label: '',
-              //     socialButtonType: SocialButtonType.linkedIn),
-            ],
-          ),
-          const SizedBox(height: 15),
-          // Text + text button (Already a user ? sign in)
-          // const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("Are You a new user?"),
-              const SizedBox(
-                width: 5,
-              ),
-              TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const SignUpScreen()));
-                  },
-                  child: const Text("Sign up"))
-            ],
-          ),
-          const SizedBox(height: 5)
+          _isLoading
+              ? Positioned.fill(
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: BackdropFilter(
+                      filter: ui.ImageFilter.blur(
+                        sigmaX: 3.0,
+                        sigmaY: 3.0,
+                      ),
+                      child: const Loader(),
+                    ),
+                  ),
+                )
+              : const SizedBox(),
         ],
       ),
-    ));
+    );
   }
 }

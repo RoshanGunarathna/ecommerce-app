@@ -11,6 +11,7 @@ import '../../../core/constants/assets_path.dart';
 import '../../../model/user.dart';
 import '../../cart/controller/cart_controller.dart';
 import '../../home/widgets/bottom_bar.dart';
+import 'sign_in_screen.dart';
 import 'sign_up_screen.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -58,7 +59,7 @@ class _SplashScreenConsumerState extends ConsumerState<SplashScreen> {
                 // return const CartScreen();
               }
             } else {
-              return const SignUpScreen();
+              return const SignInScreen();
             }
             return Scaffold(
               body: Center(

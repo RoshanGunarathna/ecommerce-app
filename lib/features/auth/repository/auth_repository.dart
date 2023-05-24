@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:ecommerce_app/core/failure.dart';
@@ -127,7 +126,7 @@ class AuthRepository {
 
       throw "Google sign-in fail";
     } on FirebaseException catch (e) {
-      throw e.message!;
+      return left(Failure(e.message!));
     } catch (e) {
       return left(Failure(e.toString()));
     }
@@ -202,9 +201,9 @@ class AuthRepository {
         }
       }
 
-      throw "${loginResult.status}";
+      return left(Failure(loginResult.status.toString()));
     } on FirebaseException catch (e) {
-      throw e.message!;
+      return left(Failure(e.message!));
     } catch (e) {
       return left(Failure(e.toString()));
     }
@@ -247,25 +246,26 @@ class AuthRepository {
 
           //create a map for send to the firebase
           Map<String, dynamic> userMap = UserModel.toMap(
-              searchKeyword: searchKeyword,
-              userModel: UserModel(
-                favorite: [],
-                email: linkedInUser
-                    .user.email!.elements![0].handleDeep!.emailAddress!,
-                photoUrl: linkedInUser.user.profilePicture != null
-                    ? linkedInUser.user.profilePicture!.displayImageContent!
-                        .elements![0].identifiers![0].identifier
-                        .toString()
-                    : Constants.avatarDefault,
-                address: [],
-                cart: [],
-                id: uid,
-                name:
-                    "${linkedInUser.user.firstName!.localized!.label} ${linkedInUser.user.lastName!.localized!.label}",
-                dateTime: dateAndTime != null
-                    ? DateTime.parse(dateAndTime)
-                    : DateTime.now(),
-              ));
+            searchKeyword: searchKeyword,
+            userModel: UserModel(
+              favorite: [],
+              email: linkedInUser
+                  .user.email!.elements![0].handleDeep!.emailAddress!,
+              photoUrl: linkedInUser.user.profilePicture != null
+                  ? linkedInUser.user.profilePicture!.displayImageContent!
+                      .elements![0].identifiers![0].identifier
+                      .toString()
+                  : Constants.avatarDefault,
+              address: [],
+              cart: [],
+              id: uid,
+              name:
+                  "${linkedInUser.user.firstName!.localized!.label} ${linkedInUser.user.lastName!.localized!.label}",
+              dateTime: dateAndTime != null
+                  ? DateTime.parse(dateAndTime)
+                  : DateTime.now(),
+            ),
+          );
 
           //save data in firebase
           await _users.doc(uid).set(userMap);
@@ -276,13 +276,13 @@ class AuthRepository {
           ).first;
           return right(user);
         } else {
-          throw "user is Null";
+          return left(Failure("user is Null"));
         }
       }
 
-      throw "user is Null";
+      return left(Failure("user is Null"));
     } on FirebaseException catch (e) {
-      throw e.message!;
+      return left(Failure(e.message!));
     } catch (e) {
       return left(Failure(e.toString()));
     }
@@ -345,10 +345,11 @@ class AuthRepository {
         ).first;
         return right(user);
       }
-
-      throw 'null';
+      return left(
+        Failure('null'),
+      );
     } on FirebaseException catch (e) {
-      throw e.message!;
+      return left(Failure(e.message!));
     } catch (e) {
       return left(Failure(e.toString()));
     }
@@ -374,9 +375,9 @@ class AuthRepository {
         return right(user);
       }
 
-      throw 'user is null';
+      return left(Failure('user is null'));
     } on FirebaseException catch (e) {
-      throw e.message!;
+      return left(Failure(e.message!));
     } catch (e) {
       return left(Failure(e.toString()));
     }
@@ -416,7 +417,7 @@ class AuthRepository {
 
       return right(null);
     } on FirebaseException catch (e) {
-      throw e.message!;
+      return left(Failure(e.message!));
     } catch (e) {
       return left(Failure(e.toString()));
     }
