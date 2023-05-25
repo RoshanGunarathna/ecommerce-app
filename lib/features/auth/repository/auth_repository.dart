@@ -132,7 +132,7 @@ class AuthRepository {
     }
   }
 
-  //Facebook sign-in
+  // Facebook sign-in.........
   FutureEither<UserModel?> signInWithFacebook(BuildContext context) async {
     try {
       final FacebookLoginResult loginResult =
@@ -152,51 +152,23 @@ class AuthRepository {
           //get user id
           final uid = userCredential.user!.uid;
           if (userCredential.additionalUserInfo!.isNewUser) {
-            //get the time&date in sri lanka
-            String? dateAndTime = await _ref
-                .read(commonGetDateAndTimeControllerProvider.notifier)
-                .getDateAndTime(context);
-
-            UserModel userModel = UserModel(
-              favorite: [],
-              email: userCredential.user!.email ?? '',
-              photoUrl:
-                  userCredential.user!.photoURL ?? Constants.avatarDefault,
-              address: [],
-              cart: [],
-              id: userCredential.user!.uid,
-              name: userCredential.user!.displayName ?? '',
-              dateTime: dateAndTime != null
-                  ? DateTime.parse(dateAndTime)
-                  : DateTime.now(),
-            );
-
-            //Generate search Keywords
-            final List<String> searchKeyword = [];
-            final splittedMultipleWords = userModel.name.trim().split(" ");
-            for (var element in splittedMultipleWords) {
-              final String wordToLowercase = element.toLowerCase();
-              for (var i = 1; i < wordToLowercase.length + 1; i++) {
-                searchKeyword.add(wordToLowercase.substring(0, i));
-              }
-            }
-
-            await _users.doc(userCredential.user!.uid).set(
-                  UserModel.toMap(
-                      userModel: userModel, searchKeyword: searchKeyword),
-                );
+            await newUser(context: context, userCredential: userCredential);
 
             //get current user data and return userData to controller
             final user = await getUserData(
               uid: uid,
-            ).first;
+            ).firstWhere((element) => element != null);
             return right(user);
           } else {
             //get current user data and return userData to controller
             final user = await getUserData(
               uid: uid,
             ).first;
-            return right(user);
+            if (user != null) {
+              return right(user);
+            } else {
+              await newUser(context: context, userCredential: userCredential);
+            }
           }
         }
       }
@@ -208,6 +180,50 @@ class AuthRepository {
       return left(Failure(e.toString()));
     }
   }
+
+  FutureVoid newUser(
+      {required BuildContext context,
+      required UserCredential userCredential}) async {
+    try {
+      //get the time&date in sri lanka
+      String? dateAndTime = await _ref
+          .read(commonGetDateAndTimeControllerProvider.notifier)
+          .getDateAndTime(context);
+
+      UserModel userModel = UserModel(
+        favorite: [],
+        email: userCredential.user!.email ?? '',
+        photoUrl: userCredential.user!.photoURL ?? Constants.avatarDefault,
+        address: [],
+        cart: [],
+        id: userCredential.user!.uid,
+        name: userCredential.user!.displayName ?? '',
+        dateTime:
+            dateAndTime != null ? DateTime.parse(dateAndTime) : DateTime.now(),
+      );
+
+      //Generate search Keywords
+      final List<String> searchKeyword = [];
+      final splittedMultipleWords = userModel.name.trim().split(" ");
+      for (var element in splittedMultipleWords) {
+        final String wordToLowercase = element.toLowerCase();
+        for (var i = 1; i < wordToLowercase.length + 1; i++) {
+          searchKeyword.add(wordToLowercase.substring(0, i));
+        }
+      }
+
+      await _users.doc(userCredential.user!.uid).set(
+            UserModel.toMap(userModel: userModel, searchKeyword: searchKeyword),
+          );
+      return right(null);
+    } on FirebaseException catch (e) {
+      return left(Failure(e.message!));
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
+  }
+
+// Facebook sign-in.........Close
 
 //** NEED TO DEVELOP **//
   //LinkedIn sign-in
@@ -289,7 +305,7 @@ class AuthRepository {
   }
 
   //Email sign-Up
-  FutureEither<UserModel?> signUpWithEmail(
+  FutureEither<bool> signUpWithEmail(
       {required String email,
       required BuildContext context,
       required String password,
@@ -339,19 +355,21 @@ class AuthRepository {
 
         //save data in firebase
         await _users.doc(uid).set(userMap);
-        //get current user data and return userData to controller
-        final user = await getUserData(
-          uid: uid,
-        ).first;
-        return right(user);
+        return right(true);
       }
       return left(
         Failure('null'),
       );
     } on FirebaseException catch (e) {
-      return left(Failure(e.message!));
+      return left(
+        Failure(e.message!),
+      );
     } catch (e) {
-      return left(Failure(e.toString()));
+      return left(
+        Failure(
+          e.toString(),
+        ),
+      );
     }
   }
 
@@ -371,7 +389,9 @@ class AuthRepository {
         final uid = userCredential.user!.uid;
 
         //get current user data and return userData to controller
-        final user = await getUserData(uid: uid).first;
+        final user = await getUserData(uid: uid)
+            .firstWhere((element) => element != null);
+
         return right(user);
       }
 
@@ -387,12 +407,38 @@ class AuthRepository {
   Stream<UserModel?> getUserData({required String uid}) {
     final res = _users.doc(uid).snapshots().map((event) {
       final res = event.data();
+
       if (res != null) {
         return UserModel.fromMap(res as Map<String, dynamic>);
+      } else {
+        return null;
       }
     });
 
     return res;
+  }
+
+  //save only email
+  FutureEither<UserModel?> saveEmail(
+      {required String email, required String uid}) async {
+    try {
+      await _users.doc(uid).update({'email': email});
+      final userModel = await getUserData(
+        uid: uid,
+      ).firstWhere((element) => element != null);
+
+      return right(userModel);
+    } on FirebaseException catch (e) {
+      return left(
+        Failure(e.message!),
+      );
+    } catch (e) {
+      return left(
+        Failure(
+          e.toString(),
+        ),
+      );
+    }
   }
 
   //logOut

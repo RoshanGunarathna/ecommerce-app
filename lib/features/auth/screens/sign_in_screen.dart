@@ -23,8 +23,6 @@ class SignInScreen extends ConsumerStatefulWidget {
 }
 
 class _SignInScreenConsumerState extends ConsumerState<SignInScreen> {
-  bool isChecked = false;
-
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
 
@@ -44,12 +42,6 @@ class _SignInScreenConsumerState extends ConsumerState<SignInScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-//navigation
-  void routeToHomeScreen(BuildContext context) {
-    Navigator.pushNamedAndRemoveUntil(
-        context, HomeScreen.routeName, (route) => false);
   }
 
 //navigation
@@ -82,133 +74,125 @@ class _SignInScreenConsumerState extends ConsumerState<SignInScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Column(
-              children: [
-                //Logo
-                Image.asset(logoPath, height: 260),
-                const SizedBox(height: 15),
-                //Email
-                Column(
-                  children: [
-                    Row(
-                      children: const [
-                        Icon(Icons.email_outlined),
-                        SizedBox(width: 10),
-                        Text("Your Email")
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    CustomTextField(
-                        controller: _emailController, hintText: "Email")
-                  ],
-                ),
-                const SizedBox(height: 15),
-                //Password
-                Column(
-                  children: [
-                    Row(
-                      children: const [
-                        Icon(Icons.lock_outline),
-                        SizedBox(width: 10),
-                        Text("Password")
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    CustomTextField(
-                        controller: _passwordController, hintText: "password")
-                  ],
-                ),
-                const SizedBox(height: 25),
-                Row(
-                  children: [
-                    Checkbox(
-                      checkColor: Colors.white,
-                      value: isChecked,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          isChecked = value!;
-                        });
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  //Logo
+                  Image.asset(logoPath, height: 260),
+                  const SizedBox(height: 15),
+                  //Email
+                  Column(
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(Icons.email_outlined),
+                          SizedBox(width: 10),
+                          Text("Your Email")
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      CustomTextField(
+                          controller: _emailController, hintText: "Email")
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  //Password
+                  Column(
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(Icons.lock_outline),
+                          SizedBox(width: 10),
+                          Text("Password")
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      CustomTextField(
+                          controller: _passwordController, hintText: "password")
+                    ],
+                  ),
+                  const SizedBox(height: 25),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                          onPressed: () {},
+                          child: const Text(
+                            "Foget Password?",
+                            style: TextStyle(color: textColor),
+                          ))
+                    ],
+                  ),
+
+                  //sign up button
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: CustomButton(
+                      text: "Sign In",
+                      onPressed: () {
+                        signIn();
                       },
                     ),
-                    const SizedBox(width: 2),
-                    const Text("Remember me"),
-                    const Spacer(),
-                    TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          "Foget Password?",
-                          style: TextStyle(color: textColor),
-                        ))
-                  ],
-                ),
-
-                //sign up button
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: CustomButton(
-                    text: "Sign In",
-                    onPressed: () {
-                      signIn();
-                    },
                   ),
-                ),
-                const SizedBox(height: 15),
-                // or continue with F G L
-                Row(
-                  children: const [
-                    // Divider(color: Text_color),
-                    Text("  Or Continue With  "),
-                    // Divider(color: Text_color),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                // Icon Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(width: 10),
-                    SocialButton(
-                        ctx: context,
-                        iconPath: facebookPath,
-                        label: '',
-                        socialButtonType: SocialButtonType.facebook),
-                    SizedBox(width: 10),
-                    SocialButton(
-                        ctx: context,
-                        iconPath: googlePath,
-                        label: '',
-                        socialButtonType: SocialButtonType.google),
-                    // SizedBox(width: 10),
-                    // SocialButton(
-                    //     ctx: context,
-                    //     iconPath: linkedInPath,
-                    //     label: '',
-                    //     socialButtonType: SocialButtonType.linkedIn),
-                  ],
-                ),
-                const SizedBox(height: 15),
-                // Text + text button (Already a user ? sign in)
-                // const Spacer(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Are You a new user?"),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    TextButton(
+                  const SizedBox(height: 15),
+                  // or continue with F G L
+                  Row(
+                    children: const [
+                      // Divider(color: Text_color),
+                      Text("  Or Continue With  "),
+                      // Divider(color: Text_color),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  // Icon Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(width: 10),
+                      SocialButton(
+                          ctx: context,
+                          iconPath: facebookPath,
+                          label: '',
+                          socialButtonType: SocialButtonType.facebook),
+                      SizedBox(width: 10),
+                      SocialButton(
+                          ctx: context,
+                          iconPath: googlePath,
+                          label: '',
+                          socialButtonType: SocialButtonType.google),
+                      // SizedBox(width: 10),
+                      // SocialButton(
+                      //     ctx: context,
+                      //     iconPath: linkedInPath,
+                      //     label: '',
+                      //     socialButtonType: SocialButtonType.linkedIn),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  // Text + text button (Already a user ? sign in)
+                  // const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Are You a new user?"),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      TextButton(
                         onPressed: () {
                           navigateToSignUpScreen(
                               context: context,
                               emailControllerText: _emailController.text);
                         },
-                        child: const Text("Sign up"))
-                  ],
-                ),
-                const SizedBox(height: 5)
-              ],
+                        child: const Text("Sign up"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5)
+                ],
+              ),
             ),
           ),
           _isLoading

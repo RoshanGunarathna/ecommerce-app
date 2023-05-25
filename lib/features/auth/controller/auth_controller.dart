@@ -1,4 +1,5 @@
 import 'package:ecommerce_app/core/utils.dart';
+import 'package:ecommerce_app/features/home/widgets/bottom_bar.dart';
 import 'package:ecommerce_app/model/user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linkedin_login/linkedin_login.dart';
 
 import '../repository/auth_repository.dart';
+import '../screens/get_email_screen.dart';
 import '../screens/sign_in_screen.dart';
 
 //user provider
@@ -50,8 +52,23 @@ class AuthController extends StateNotifier<bool> {
     state = false;
     user.fold((l) {
       showSnackBar(context: context, text: l.message);
-    }, (userModel) {
-      _ref.read(userProvider.notifier).update((state) => userModel);
+    }, (userModel) async {
+      if (userModel != null) {
+        if (userModel.email.isEmpty) {
+          print("**NotAnEmail");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => GetEmailScreen(
+                uid: userModel.id,
+              ),
+            ),
+          );
+        } else {
+          print("**EmailIsIncluded");
+          await _ref.read(userProvider.notifier).update((state) => userModel);
+        }
+      }
     });
   }
 
@@ -62,8 +79,25 @@ class AuthController extends StateNotifier<bool> {
     state = false;
     user.fold((l) {
       showSnackBar(context: context, text: l.message);
-    }, (userModel) {
-      _ref.read(userProvider.notifier).update((state) => userModel);
+    }, (userModel) async {
+      if (userModel != null) {
+        if (userModel.email.isNotEmpty) {
+          print("**EmailIsIncluded");
+          await _ref.read(userProvider.notifier).update((state) => userModel);
+        } else {
+          print("**NotAnEmail");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => GetEmailScreen(
+                uid: userModel.id,
+              ),
+            ),
+          );
+        }
+      } else {
+        await _ref.read(userProvider.notifier).update((state) => null);
+      }
     });
   }
 
@@ -78,8 +112,23 @@ class AuthController extends StateNotifier<bool> {
         context: context, linkedInUser: linkedInUser);
     state = false;
     user.fold((l) => showSnackBar(context: context, text: l.message),
-        (userModel) {
-      _ref.read(userProvider.notifier).update((state) => userModel);
+        (userModel) async {
+      if (userModel != null && userModel.email.isEmpty) {
+        print("**NotAnEmail");
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => GetEmailScreen(
+              uid: userModel.id,
+            ),
+          ),
+        );
+      } else {
+        print("**EmailIsIncluded");
+        await _ref.read(userProvider.notifier).update((state) => userModel);
+        Navigator.pushNamedAndRemoveUntil(
+            context, BottomBar.routeName, (route) => false);
+      }
     });
   }
 
@@ -95,8 +144,19 @@ class AuthController extends StateNotifier<bool> {
     state = false;
     user.fold((l) {
       showSnackBar(context: context, text: l.message);
-    }, (userModel) {
-      _ref.read(userProvider.notifier).update((state) => userModel);
+    }, (isOk) {
+      if (isOk) {
+        showSnackBar(
+            context: context, text: "Register completed! Now you can Sign-IN");
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SignInScreen(
+              emailControllerText: email,
+            ),
+          ),
+        );
+      }
     });
   }
 
@@ -116,8 +176,23 @@ class AuthController extends StateNotifier<bool> {
       (l) {
         showSnackBar(context: context, text: l.message);
       },
-      (userModel) {
-        _ref.read(userProvider.notifier).update((state) => userModel);
+      (userModel) async {
+        if (userModel != null && userModel.email.isEmpty) {
+          print("**NotAnEmail");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => GetEmailScreen(
+                uid: userModel.id,
+              ),
+            ),
+          );
+        } else {
+          print("**EmailIsIncluded");
+          await _ref.read(userProvider.notifier).update((state) => userModel);
+          Navigator.pushNamedAndRemoveUntil(
+              context, BottomBar.routeName, (route) => false);
+        }
       },
     );
   }
@@ -133,12 +208,34 @@ class AuthController extends StateNotifier<bool> {
       (l) {
         showSnackBar(context: context, text: l.message);
       },
-      (r) {
+      (r) async {
+        await _ref.read(userProvider.notifier).update((state) => null);
         showSnackBar(context: context, text: "LogOut Successful!");
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => SignInScreen()),
             (route) => false);
+      },
+    );
+  }
+
+  //save email only
+  void saveEmail({
+    required BuildContext context,
+    required String email,
+    required String uid,
+  }) async {
+    state = true;
+    final res = await _authRepository.saveEmail(email: email, uid: uid);
+    state = false;
+    res.fold(
+      (l) {
+        showSnackBar(context: context, text: l.message);
+      },
+      (userModel) async {
+        await _ref.read(userProvider.notifier).update((state) => userModel);
+        Navigator.pushNamedAndRemoveUntil(
+            context, BottomBar.routeName, (route) => false);
       },
     );
   }

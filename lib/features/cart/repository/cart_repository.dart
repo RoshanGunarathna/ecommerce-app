@@ -151,7 +151,11 @@ class CartRepository {
       }
       return right(returnValue);
     } on FirebaseException catch (e) {
-      throw e.message.toString();
+      return left(
+        Failure(
+          e.message.toString(),
+        ),
+      );
     } catch (e) {
       return left(Failure(e.toString()));
     }

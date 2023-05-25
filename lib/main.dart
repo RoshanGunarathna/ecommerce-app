@@ -45,13 +45,15 @@ class MyApp extends StatelessWidget {
       locale: DevicePreview.locale(context),
       builder: DevicePreview.appBuilder,
       theme: ThemeData(
-          floatingActionButtonTheme: const FloatingActionButtonThemeData(
-              backgroundColor: primaryColor),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-              style: ElevatedButton.styleFrom(backgroundColor: primaryColor)),
-          primaryColor: primaryColor,
-          scaffoldBackgroundColor: whiteColor,
-          appBarTheme: const AppBarTheme(backgroundColor: whiteColor)),
+        floatingActionButtonTheme:
+            const FloatingActionButtonThemeData(backgroundColor: primaryColor),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(backgroundColor: primaryColor)),
+        primaryColor: primaryColor,
+        scaffoldBackgroundColor: whiteColor,
+        appBarTheme:
+            const AppBarTheme(backgroundColor: whiteColor, elevation: 0),
+      ),
       debugShowCheckedModeBanner: true,
       home: const SplashScreen(),
       onGenerateRoute: (settings) => generateRoute(settings),
