@@ -1,37 +1,35 @@
-import 'package:device_preview/device_preview.dart';
-import 'package:ecommerce_app/router.dart';
+import 'dart:io';
 
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
+import 'package:test_project/providers/user_provider.dart';
 
-import 'core/palette.dart';
-
-import 'features/auth/screens/splash_screen.dart';
+import 'auth/screeens/login_screen.dart';
+import 'constants.dart';
 import 'firebase_options.dart';
+import 'http-overrides.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = MyHttpOverrides();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(
     DevicePreview(
       enabled: !kReleaseMode,
-      builder: (context) => ProviderScope(
-        // observers: [
-        //   LoggerRiverpod(),
-        // ],
-        child: MyApp(),
+      builder: (context) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (context) => UserProvider(),
+          ),
+        ],
+        child: const MyApp(),
       ), // Wrap your app
     ),
-    // ProviderScope(
-    //   // observers: [
-    //   //   LoggerRiverpod(),
-    //   // ],
-    //   child: MyApp(),
-    // ), // Wrap your app
   );
 }
 
@@ -44,19 +42,22 @@ class MyApp extends StatelessWidget {
       useInheritedMediaQuery: true,
       locale: DevicePreview.locale(context),
       builder: DevicePreview.appBuilder,
+      // darkTheme: ThemeData.dark(),
+      debugShowCheckedModeBanner: false,
+      title: appTitle,
       theme: ThemeData(
-        floatingActionButtonTheme:
-            const FloatingActionButtonThemeData(backgroundColor: primaryColor),
+        appBarTheme: const AppBarTheme(color: primaryColor, elevation: 0),
         elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(backgroundColor: primaryColor)),
+          style: ButtonStyle(
+            padding: const MaterialStatePropertyAll(
+              EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            ),
+            backgroundColor: MaterialStateProperty.all(primaryColor),
+          ),
+        ),
         primaryColor: primaryColor,
-        scaffoldBackgroundColor: whiteColor,
-        appBarTheme:
-            const AppBarTheme(backgroundColor: whiteColor, elevation: 0),
       ),
-      debugShowCheckedModeBanner: true,
-      home: const SplashScreen(),
-      onGenerateRoute: (settings) => generateRoute(settings),
+      home: const LoginScreen(),
     );
   }
 }
