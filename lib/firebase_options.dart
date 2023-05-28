@@ -17,19 +17,13 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -52,12 +46,30 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyAn0E7GecOng8Ncp797bzeTAHWGe-RnxK4',
+    appId: '1:1041881133708:web:e9e68be2115f0947f4c1a9',
+    messagingSenderId: '1041881133708',
+    projectId: 'ecommerce-app-2fe57',
+    authDomain: 'ecommerce-app-2fe57.firebaseapp.com',
+    storageBucket: 'ecommerce-app-2fe57.appspot.com',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAXSloqKfeU4Zu3fUdIvvIpkriO_k8fBzM',
-    appId: '1:406188630998:android:b94659d459ac2b399b3a77',
-    messagingSenderId: '406188630998',
-    projectId: 'note-book-1458b',
-    databaseURL: 'https://note-book-1458b-default-rtdb.firebaseio.com',
-    storageBucket: 'note-book-1458b.appspot.com',
+    apiKey: 'AIzaSyDbOprlLCR9cAz0-9AB1lZOSKweF1zpAp8',
+    appId: '1:1041881133708:android:88832401f7195f67f4c1a9',
+    messagingSenderId: '1041881133708',
+    projectId: 'ecommerce-app-2fe57',
+    storageBucket: 'ecommerce-app-2fe57.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyCZajFT6UZt_sCXaOlTV1P-cq1TLSe5va4',
+    appId: '1:1041881133708:ios:f3953c05fbd53657f4c1a9',
+    messagingSenderId: '1041881133708',
+    projectId: 'ecommerce-app-2fe57',
+    storageBucket: 'ecommerce-app-2fe57.appspot.com',
+    iosClientId: '1041881133708-q4q2ooq96cvd1gegq7fj5ino2q062om9.apps.googleusercontent.com',
+    iosBundleId: 'com.example.ecommerceApp',
   );
 }
