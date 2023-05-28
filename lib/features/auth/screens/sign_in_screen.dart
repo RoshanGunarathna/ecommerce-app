@@ -8,7 +8,6 @@ import '../../../core/common/widgets/loader.dart';
 import '../../../core/constants/assets_path.dart';
 import '../../../core/enums/enums.dart';
 import '../../../core/palette.dart';
-import '../../home/screens/home_screen.dart';
 import '../controller/auth_controller.dart';
 import '../widgets/social_button.dart';
 import 'sign_up_screen.dart';

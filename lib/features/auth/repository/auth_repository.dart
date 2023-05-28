@@ -151,6 +151,7 @@ class AuthRepository {
         if (userCredential.user != null) {
           //get user id
           final uid = userCredential.user!.uid;
+
           if (userCredential.additionalUserInfo!.isNewUser) {
             await newUser(context: context, userCredential: userCredential);
 
@@ -423,6 +424,7 @@ class AuthRepository {
       {required String email, required String uid}) async {
     try {
       await _users.doc(uid).update({'email': email});
+
       final userModel = await getUserData(
         uid: uid,
       ).firstWhere((element) => element != null);

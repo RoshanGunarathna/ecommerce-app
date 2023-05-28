@@ -37,15 +37,14 @@ class _SplashScreenConsumerState extends ConsumerState<SplashScreen> {
       await ref.read(userProvider.notifier).update((state) => userModel);
       // update Favorite Product List
       // ignore: use_build_context_synchronously
-      ref
-          .read(favoriteControllerProvider.notifier)
-          .updateFavoriteList(context: context);
+      await ref
+          .read(favoriteProvider.notifier)
+          .update((state) => userModel!.favorite);
+      ;
 
       // update cart list
       //ignore: use_build_context_synchronously
-      ref
-          .read(cartControllerProvider.notifier)
-          .updateCartList(context: context);
+      await ref.read(cartProvider.notifier).update((state) => userModel!.cart);
     }
 
     setState(() {});

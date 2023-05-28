@@ -54,8 +54,13 @@ class AuthController extends StateNotifier<bool> {
       showSnackBar(context: context, text: l.message);
     }, (userModel) async {
       if (userModel != null) {
-        if (userModel.email.isEmpty) {
-          print("**NotAnEmail");
+        if (userModel.email.isNotEmpty) {
+          print("**EmailIsIncluded");
+          await _ref.read(userProvider.notifier).update((state) => userModel);
+          Navigator.pushNamedAndRemoveUntil(
+              context, BottomBar.routeName, (route) => false);
+        } else {
+          print("**NoEmail");
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -64,10 +69,9 @@ class AuthController extends StateNotifier<bool> {
               ),
             ),
           );
-        } else {
-          print("**EmailIsIncluded");
-          await _ref.read(userProvider.notifier).update((state) => userModel);
         }
+      } else {
+        await _ref.read(userProvider.notifier).update((state) => null);
       }
     });
   }
@@ -84,8 +88,10 @@ class AuthController extends StateNotifier<bool> {
         if (userModel.email.isNotEmpty) {
           print("**EmailIsIncluded");
           await _ref.read(userProvider.notifier).update((state) => userModel);
+          Navigator.pushNamedAndRemoveUntil(
+              context, BottomBar.routeName, (route) => false);
         } else {
-          print("**NotAnEmail");
+          print("**NoEmail");
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -113,21 +119,25 @@ class AuthController extends StateNotifier<bool> {
     state = false;
     user.fold((l) => showSnackBar(context: context, text: l.message),
         (userModel) async {
-      if (userModel != null && userModel.email.isEmpty) {
-        print("**NotAnEmail");
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => GetEmailScreen(
-              uid: userModel.id,
+      if (userModel != null) {
+        if (userModel.email.isNotEmpty) {
+          print("**EmailIsIncluded");
+          await _ref.read(userProvider.notifier).update((state) => userModel);
+          Navigator.pushNamedAndRemoveUntil(
+              context, BottomBar.routeName, (route) => false);
+        } else {
+          print("**NoEmail");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => GetEmailScreen(
+                uid: userModel.id,
+              ),
             ),
-          ),
-        );
+          );
+        }
       } else {
-        print("**EmailIsIncluded");
-        await _ref.read(userProvider.notifier).update((state) => userModel);
-        Navigator.pushNamedAndRemoveUntil(
-            context, BottomBar.routeName, (route) => false);
+        await _ref.read(userProvider.notifier).update((state) => null);
       }
     });
   }
@@ -177,21 +187,25 @@ class AuthController extends StateNotifier<bool> {
         showSnackBar(context: context, text: l.message);
       },
       (userModel) async {
-        if (userModel != null && userModel.email.isEmpty) {
-          print("**NotAnEmail");
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => GetEmailScreen(
-                uid: userModel.id,
+        if (userModel != null) {
+          if (userModel.email.isNotEmpty) {
+            print("**EmailIsIncluded");
+            await _ref.read(userProvider.notifier).update((state) => userModel);
+            Navigator.pushNamedAndRemoveUntil(
+                context, BottomBar.routeName, (route) => false);
+          } else {
+            print("**NoEmail");
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => GetEmailScreen(
+                  uid: userModel.id,
+                ),
               ),
-            ),
-          );
+            );
+          }
         } else {
-          print("**EmailIsIncluded");
-          await _ref.read(userProvider.notifier).update((state) => userModel);
-          Navigator.pushNamedAndRemoveUntil(
-              context, BottomBar.routeName, (route) => false);
+          await _ref.read(userProvider.notifier).update((state) => null);
         }
       },
     );
