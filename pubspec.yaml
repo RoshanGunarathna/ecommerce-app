@@ -66,6 +66,7 @@ dependencies:
   device_preview: ^1.1.0
   http: ^0.13.6
   flutter_stripe: ^9.2.0
+  cached_network_image: ^3.2.3
 
 dev_dependencies:
   flutter_test:

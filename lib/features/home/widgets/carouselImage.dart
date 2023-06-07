@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
@@ -20,10 +21,13 @@ class CarouselImage extends StatelessWidget {
               decoration: BoxDecoration(
                 image: DecorationImage(
                   alignment: Alignment.centerLeft,
-                  image: NetworkImage(
-                    product.images[0],
-                  ),
+                  image: CachedNetworkImageProvider(product.images[0]),
                   fit: BoxFit.fitHeight,
+
+                  // NetworkImage(
+                  //   product.images[0],
+                  // ),
+                  // fit: BoxFit.fitHeight,
                 ),
               ),
               child: Offer(product: product),

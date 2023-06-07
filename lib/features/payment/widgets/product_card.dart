@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/palette.dart';
@@ -26,13 +27,17 @@ class ProductCard extends StatelessWidget {
         child: Row(
           children: [
             Container(
-                height: 120,
-                width: 120,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                child: Image.network(
-                  product.images[0],
-                )),
+              height: 120,
+              width: 120,
+              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+              // child: Image.network(
+              //   product.images[0],
+              // ),
+              child: CachedNetworkImage(
+                key: UniqueKey(),
+                imageUrl: product.images[0],
+              ),
+            ),
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

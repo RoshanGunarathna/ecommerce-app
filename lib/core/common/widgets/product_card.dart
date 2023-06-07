@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecommerce_app/features/cart/screens/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -85,8 +86,13 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
                   height: double.infinity,
                   padding:
                       const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-                  child: Image.network(
-                    widget.product.images[0],
+                  // child: Image.network(
+                  //   widget.product.images[0],
+                  //   fit: BoxFit.fitHeight,
+                  // ),
+                  child: CachedNetworkImage(
+                    key: UniqueKey(),
+                    imageUrl: widget.product.images[0],
                     fit: BoxFit.fitHeight,
                   ),
                 ),

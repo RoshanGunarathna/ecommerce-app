@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:roundcheckbox/roundcheckbox.dart';
@@ -188,13 +189,24 @@ class _ProductCardConsumerState extends ConsumerState<ProductCard> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                   child: _isCheckButtonPressed
-                      ? Image.network(
-                          widget.product.images[0],
+                      ? CachedNetworkImage(
+                          key: UniqueKey(),
+                          imageUrl: widget.product.images[0],
                         )
-                      : Image.network(
-                          widget.product.images[0],
+                      : CachedNetworkImage(
+                          key: UniqueKey(),
+                          imageUrl: widget.product.images[0],
                           color: unselectedColor,
                         ),
+                  // ?
+
+                  // Image.network(
+                  //     widget.product.images[0],
+                  //   )
+                  // : Image.network(
+                  //     widget.product.images[0],
+                  //     color: unselectedColor,
+                  //   ),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
