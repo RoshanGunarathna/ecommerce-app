@@ -1,0 +1,162 @@
+{
+  "project_info": {
+    "project_number": "903243239110",
+    "project_id": "dine-delish-app",
+    "storage_bucket": "dine-delish-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903243239110:android:fd4763feb9e2f347ba11c7",
+        "android_client_info": {
+          "package_name": "com.example.dine_delish"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "903243239110-rndmvu9lmrun3tuc3g70mjpfl21djlrn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSHiPgl70InAtuMPY0RN669GpvCzyk2f8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "903243239110-ktejggd4l4acq2b0hsqkvig6dq58unso.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "903243239110-2g3ssj42ngfq2cu6ad2op3m452iucpbu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.nsbmFoodApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903243239110:android:fdbed73846c98358ba11c7",
+        "android_client_info": {
+          "package_name": "com.example.ecommerce_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "903243239110-rndmvu9lmrun3tuc3g70mjpfl21djlrn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSHiPgl70InAtuMPY0RN669GpvCzyk2f8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "903243239110-ktejggd4l4acq2b0hsqkvig6dq58unso.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "903243239110-2g3ssj42ngfq2cu6ad2op3m452iucpbu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.nsbmFoodApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903243239110:android:21cf0da0aec97888ba11c7",
+        "android_client_info": {
+          "package_name": "com.example.food_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "903243239110-ij7bcod43n3sdjrogk4q7hjgajkv7fgl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.food_app",
+            "certificate_hash": "b2c7b3f1a2ed92936c01ef47d8b70bd92152bf4f"
+          }
+        },
+        {
+          "client_id": "903243239110-rndmvu9lmrun3tuc3g70mjpfl21djlrn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSHiPgl70InAtuMPY0RN669GpvCzyk2f8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "903243239110-ktejggd4l4acq2b0hsqkvig6dq58unso.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "903243239110-2g3ssj42ngfq2cu6ad2op3m452iucpbu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.nsbmFoodApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903243239110:android:43e3cc4f3a248655ba11c7",
+        "android_client_info": {
+          "package_name": "com.example.nsbm_food_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "903243239110-rndmvu9lmrun3tuc3g70mjpfl21djlrn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSHiPgl70InAtuMPY0RN669GpvCzyk2f8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "903243239110-ktejggd4l4acq2b0hsqkvig6dq58unso.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "903243239110-2g3ssj42ngfq2cu6ad2op3m452iucpbu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.nsbmFoodApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -65,8 +66,11 @@ class CommonGetProductRepository {
   //get Discounted product data
   Future<List<ProductModel>> getDiscountedProductData() async {
     try {
-      final res = await _products.where("discount", isNull: false).get();
+      final res = await _products.where("discount", isNotEqualTo: null).get();
+      //final res = await _products.orderBy("discount").startAfter([null]).get();
+      print("Model: ${res.docs}");
       final productData = res.docs.map((e) {
+        print("Modell: ${e.data()}");
         return ProductModel.fromMap(e.data() as Map<String, dynamic>);
       }).toList();
       return productData;

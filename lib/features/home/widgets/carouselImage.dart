@@ -13,6 +13,7 @@ class CarouselImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return CarouselSlider(
       items: discountedProductList.map((product) {
+        print(product.discount);
         return Stack(
           children: [
             Container(

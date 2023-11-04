@@ -20,12 +20,14 @@ void main() async {
   runApp(
     DevicePreview(
       enabled: !kReleaseMode,
-      builder: (context) => ProviderScope(
-        // observers: [
-        //   LoggerRiverpod(),
-        // ],
-        child: MyApp(),
-      ), // Wrap your app
+      builder: (context) {
+        return ProviderScope(
+          // observers: [
+          //   LoggerRiverpod(),
+          // ],
+          child: MyApp(),
+        );
+      }, // Wrap your app
     ),
   );
   //   // ProviderScope(

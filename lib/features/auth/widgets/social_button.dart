@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:linkedin_login/linkedin_login.dart';
 
-import '../../../core/constants/keys.dart';
 import '../../../core/enums/enums.dart';
 
 import '../controller/auth_controller.dart';
@@ -37,41 +36,6 @@ class SocialButton extends ConsumerWidget {
     ref.read(authControllerProvider.notifier).signInWithFacebook(context);
   }
 
-//** NEED TO DEVELOP **//
-//linkedIn sign-in
-  void signInWithLinkedIn(WidgetRef ref, BuildContext context) {
-    // ref.read(authControllerProvider.notifier).signInWithLinkedin(context);
-    Navigator.push(context, MaterialPageRoute(builder: (_) {
-      return LinkedInUserWidget(
-        redirectUrl: linkedinRedirectURL,
-        clientId: linkedinClientID,
-        clientSecret: linkedinClientSecret,
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back,
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          title: const Text("LinkedIn"),
-        ),
-        onGetUserProfile: (UserSucceededAction linkedInUser) async {
-          ref
-              .read(authControllerProvider.notifier)
-              .signInWithLinkedin(linkedInUser: linkedInUser, context: context);
-        },
-        onError: (UserFailedAction e) {
-          ref
-              .read(authControllerProvider.notifier)
-              .linkedInErrorHandling(error: e.toString());
-          return;
-        },
-      );
-    }));
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return IconButton(
@@ -81,7 +45,7 @@ class SocialButton extends ConsumerWidget {
             ? signInWithFacebook(ref, context)
             : socialButtonType == SocialButtonType.google
                 ? signInWithGoogle(ref, context)
-                : signInWithLinkedIn(ref, ctx);
+                : null;
       },
       icon: Image.asset(
         iconPath,
